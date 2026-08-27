@@ -30,7 +30,7 @@ cd '<项目根目录>\MoonBase\middleware'
 脚本会要求输入 `MOVE`，并执行 `Zero -> ±1° 俯仰 -> Zero`。若中间件窗口出现
 `[TCP] 客户端已连接`、`[指令] Runing ...`、`[MotionCtrl]`，说明 Unity/测试脚本到中间件的链路成立；平台是否实际动作还要看厂商 SDK、加密狗、配置文件和 UDP 网络。
 
-## 二、三个驾驶模式按钮
+## 二、Unity 内的驾驶模式按钮
 
 真正的按钮对象名称是：
 
@@ -42,7 +42,31 @@ cd '<项目根目录>\MoonBase\middleware'
 
 按钮事件在 `DriveModeManager.Start()` 中运行时通过 `Button.onClick.AddListener` 绑定，因此在 Unity Inspector 的 Persistent OnClick 列表为空是正常的。它们只有进入 Play 模式后才会切换。
 
-## 三、按钮验收表
+## 三、底座上的实体按钮
+
+底座实体按钮与上面的 Unity UI 按钮不是同一套输入。目前仓库没有读取底座实体按钮的实现；中间件只解析 `Runing`、`Zero`、`Reset` 三类 TCP 指令，底层 `MpDll.dll` 当前代码也只调用运动、回零和复位方法。
+
+先按按钮的连接类型分类：
+
+| 连接类型 | 正确处理方式 | 是否接入 Unity |
+|---|---|---|
+| 急停、使能、平台控制器面板按钮 | 由安全回路/Mbox100 控制器/厂商软件处理 | 通常不接入，不能用 Unity 替代急停 |
+| USB HID 按钮盒 | Windows 会识别为键盘、游戏手柄或 HID 设备 | 可以新增 HID/Unity Input 适配层 |
+| 串口/RS-485/PLC 数字量按钮 | 读取 COM 口或 PLC 协议，再转换为业务事件 | 可以新增串口/PLC 适配层 |
+| 只接到底座、不接 PC 的按钮 | PC 和 Unity 无法读取其状态 | 需要厂商 SDK、控制器协议或额外采集模块 |
+
+不能直接把实体按钮映射成 `Zero#end` 或 `Reset#end`：首先要确认它通过什么设备和协议被电脑看到。急停按钮必须保留硬件安全链路，不能改成软件按钮。
+
+目标结构应为：
+
+```text
+底座按钮 -> USB HID / 串口 / PLC / Mbox100 控制器
+         -> ButtonInputAdapter（按设备协议实现）
+         -> Enable / Zero / Reset / Stop 业务事件
+         -> 中间件安全命令
+```
+
+## 四、按钮验收表
 
 | 操作 | 预期结果 |
 |---|---|
@@ -53,7 +77,7 @@ cd '<项目根目录>\MoonBase\middleware'
 
 按键和鼠标各测一次：如果按键能切换、鼠标不能，优先检查 `EventSystem`、Canvas 的 `GraphicRaycaster`、按钮是否 `Interactable`，以及是否有遮挡 UI；如果两者都不能，检查 Unity Console 是否有脚本编译错误，以及 `car` 对象上的 `DriveModeManager` 是否启用且 3 个 Button 引用已绑定。
 
-## 四、平台联调顺序
+## 五、平台联调顺序
 
 1. 在 `MotionPlatformController` 中将 `enablePlatform` 设为关闭，先验收车辆、AI 和 UI。
 2. 启动中间件，确认监听 `127.0.0.1:9999`，再运行端口探测脚本。
@@ -61,7 +85,7 @@ cd '<项目根目录>\MoonBase\middleware'
 4. 最后才使用 `-ExecuteMotion` 做小幅实体运动测试。
 5. 停止 Unity Play 前先点击/调用回零；关闭中间件前确认已完成回零。
 
-## 五、常见故障定位
+## 六、常见故障定位
 
 - `TcpTestSucceeded=False`：中间件没有启动、端口被占用或启动失败。
 - 中间件能监听但 SDK 初始化失败：检查 SafeNet、`C:\ProgramData\MP\48.xml`、`484.xml`、厂商 DLL 和日志中的绝对路径问题。
