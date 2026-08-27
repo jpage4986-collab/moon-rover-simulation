@@ -1,0 +1,41 @@
+# Unity generated folders and local editor state
+Assets (2)/Library/
+Assets (2)/Temp/
+Assets (2)/obj/
+Assets (2)/Logs/
+Assets (2)/UserSettings/
+Assets (2)/.vs/
+Assets (2)/*.csproj
+Assets (2)/*.sln
+
+# Unity transient files
+**/[Tt]emp/
+**/[Ll]ibrary/
+**/[Oo]bj/
+**/[Ll]og[s]*/
+**/[Uu]ser[Ss]ettings/
+**/*.pidb
+**/*.svd
+**/*.pdb
+**/~UnityDirMonSyncFile~*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.user
+*.userprefs
+*.booproj
+
+# Runtime output and local test captures
+**/*.log
+MoonBase/middleware/*.tmp
+MoonBase/middleware/*.bak
+MoonBase/middleware/PlayerLog/
+
+# Vendor/runtime binaries: keep them local unless redistribution is authorized.
+# See MoonBase/middleware/MIDDLEWARE_BINARIES.md.
+MoonBase/middleware/*.dll
+MoonBase/middleware/MPSdkMiddleware*.exe
+
+# Hardware vendor plugin used by the optional Logitech G29 integration.
+Assets (2)/Assets/Plugins/*.dll

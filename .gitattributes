@@ -1,0 +1,8 @@
+# Preserve Unity YAML and scripts as text for useful diffs.
+*.unity text eol=lf
+*.prefab text eol=lf
+*.asset text eol=lf
+*.meta text eol=lf
+*.cs text eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=lf

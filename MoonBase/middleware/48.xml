@@ -1,0 +1,490 @@
+<Content>
+  <OneThreeDof>
+    <!--  单人蛋椅三轴   -->
+    <BothDist>350</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>400</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>460</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>90</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  皮带轮比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </OneThreeDof>
+  <TwoThreeDof>
+    <!--  双人蛋椅三轴   -->
+    <BothDist>980</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>630</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>460</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>130</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  皮带轮比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </TwoThreeDof>
+  <Two2ThreeDof>
+    <!--  神州飞船三轴   -->
+    <BothDist>980</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>950</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>530</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>160</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  皮带轮比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </Two2ThreeDof>
+  <Two3ThreeDof>
+    <!--  暗黑飞船三轴   -->
+    <BothDist>1400</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>820</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>550</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>180</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  皮带轮比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </Two3ThreeDof>
+  <Two4ThreeDof>
+    <!--  摩托车三轴   -->
+    <BothDist>310</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>480</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>450</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>100</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  皮带轮比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </Two4ThreeDof>
+  <Two5ThreeDof>
+    <!--  VR赛车三轴   -->
+    <BothDist>700</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>1000</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>400</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>130</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1:1</Ratio>
+    <!--  皮带轮比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+    <XaxisSource>X</XaxisSource>
+    <!--  遥感轴位置 -->
+    <XJoystickGain>-10</XJoystickGain>
+    <!--  摇杆控制X左右幅度和方向，1°*JoystickGain  越大幅度越大，反方向用-  -->
+    <XOffset>0</XOffset>
+    <!--  	X轴偏移数据  -->
+    <YaxisSource>Z</YaxisSource>
+    <!--  遥感轴位置 -->
+    <YJoystickGain>10</YJoystickGain>
+    <!--  摇杆控制X左右幅度和方向，1°*JoystickGain  越大幅度越大，反方向用-  -->
+    <YOffset>0</YOffset>
+    <!--  	X轴偏移数据  -->
+    <JoystickName>Logitech G29 Driving Force Racing Wheel USB</JoystickName>
+    <!--  遥感名字  -->
+  </Two5ThreeDof>
+  <Two6ThreeDof>
+    <!--  三屏赛车三轴   -->
+    <BothDist>1320</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>1350</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>940</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>350</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  皮带轮比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+    <XaxisSource>X</XaxisSource>
+    <!--  遥感轴位置 -->
+    <XJoystickGain>-10</XJoystickGain>
+    <!--  摇杆控制X左右幅度和方向，1°*JoystickGain  越大幅度越大，反方向用-  -->
+    <XOffset>0</XOffset>
+    <!--  	X轴偏移数据  -->
+    <YaxisSource>Z</YaxisSource>
+    <!--  遥感轴位置 -->
+    <YJoystickGain>10</YJoystickGain>
+    <!--  摇杆控制X左右幅度和方向，1°*JoystickGain  越大幅度越大，反方向用-  -->
+    <YOffset>0</YOffset>
+    <!--  	X轴偏移数据  -->
+    <JoystickName>G29 Driving Force Racing Wheel</JoystickName>
+    <!--  遥感名字  -->
+  </Two6ThreeDof>
+  <Twocrank>
+    <!--  双人曲柄   -->
+    <BothDist>800</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>500</MiddleDist>
+    <!--  曲柄到支撑轴的距离   -->
+    <UpCrankDist>370</UpCrankDist>
+    <!--  上摆臂长度   -->
+    <DnCrankDist>60</DnCrankDist>
+    <!--   下摆臂长度   -->
+    <H>510</H>
+    <!--  支撑轴高度   -->
+    <GearRatio>40:1</GearRatio>
+    <!--  变速箱齿比-->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </Twocrank>
+  <FourThreeDof>
+    <!--  四人三轴   -->
+    <BothDist>700</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>965</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>550</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>180</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </FourThreeDof>
+  <Fourcrank>
+    <!--  四人曲柄   -->
+    <BothDist>980</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>630</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <UpCrankDist>382.1</UpCrankDist>
+    <!--  上摆臂长度   -->
+    <DnCrankDist>85</DnCrankDist>
+    <!--   下摆臂长度   -->
+    <H>372.5</H>
+    <!--  支撑轴高度   -->
+    <GearRatio>45:1</GearRatio>
+    <!--  变速箱齿比-->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </Fourcrank>
+  <SixDof>
+    <!--  六轴   -->
+    <UpR>550</UpR>
+    <!--  上平台半径   -->
+    <DnR>570</DnR>
+    <!--  下平台半径  -->
+    <UpDist>190</UpDist>
+    <!--  上平台短边长度-->
+    <DnDist>190</DnDist>
+    <!--上平台短边长度-->
+    <Ldrive>700</Ldrive>
+    <!--  电动缸初始长度 -->
+    <Lflex>150</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </SixDof>
+  <Sixcrank>
+    <!--  六人曲柄  -->
+    <xUpR>530</xUpR>
+    <!--  侧倾轴 上支点到中心的距离  -->
+    <xDnR>530</xDnR>
+    <!--  侧倾轴 下支点到中心的距离   -->
+    <yUpR>530</yUpR>
+    <!--  俯昂轴 上支点到中心的距离  -->
+    <yDnR>530</yDnR>
+    <!--  俯昂轴 下支点到中心的距离  -->
+    <xUpCrankDist>382.1</xUpCrankDist>
+    <!--  侧倾轴 上摆臂长度   -->
+    <xDnCrankDist>85</xDnCrankDist>
+    <!--  侧倾轴 下摆臂长度   -->
+    <yUpCrankDist>382.1</yUpCrankDist>
+    <!--  俯昂轴 上摆臂长度   -->
+    <yDnCrankDist>85</yDnCrankDist>
+    <!--  俯昂轴 下摆臂长度   -->
+    <H>372.5</H>
+    <!--  高度   -->
+    <GearRatio>45:1</GearRatio>
+    <!--  变速箱齿比-->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </Sixcrank>
+  <One360>
+    <!--  单人360   -->
+    <Ldrive>400</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>150</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  比例  -->
+    <BigGear>85</BigGear>
+    <!--  大齿轮数  -->
+    <SmallGear>24</SmallGear>
+    <!--  小齿轮数  -->
+    <GearRatio>40:1</GearRatio>
+    <!--  比例  -->
+    <AxisSequence>1</AxisSequence>
+    <!--  轴序，0（1号电缸，2号旋转）， 1（2号电缸，1号旋转）-->
+  </One360>
+  <Two360>
+    <!--  双人360   -->
+    <Ldrive>750</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>180</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  比例  -->
+    <BigGear>85</BigGear>
+    <!--  大齿轮数  -->
+    <SmallGear>24</SmallGear>
+    <!--  小齿轮数  -->
+    <GearRatio>40:1</GearRatio>
+    <!--  比例  -->
+    <AxisSequence>1</AxisSequence>
+    <!--  轴序，0（1号电缸，2号旋转）， 1（2号电缸，1号旋转）-->
+  </Two360>
+  <AirPlane>
+    <!-- 单人小飞机（遥感控制动作）   -->
+    <BothDist>525</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>663</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>450</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>100</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1:1.5</Ratio>
+    <!--  皮带轮比例  -->
+    <XJoystickGain>-10</XJoystickGain>
+    <!--  摇杆控制X左右幅度和方向，1°*JoystickGain  越大幅度越大，反方向用-  -->
+    <XOffset>0</XOffset>
+    <!--  	X轴偏移数据  -->
+    <YJoystickGain>10</YJoystickGain>
+    <!--  摇杆控制X左右幅度和方向，1°*JoystickGain  越大幅度越大，反方向用-  -->
+    <YOffset>0</YOffset>
+    <!--  	Y轴偏移数据  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+    <JoystickName>PXN-2113 Pro</JoystickName>
+    <!--  遥感名字  -->
+  </AirPlane>
+  <twoAirPlane>
+    <!--  双人小飞机（遥感控制动作）   -->
+    <BothDist>650</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>700</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>450</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>80</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1:1.5</Ratio>
+    <!--  皮带轮比例  -->
+    <XaxisSource>X</XaxisSource>
+    <!--  遥感轴位置 -->
+    <XJoystickGain>-10</XJoystickGain>
+    <!--  摇杆控制X左右幅度和方向，1°*JoystickGain  越大幅度越大，反方向用-  -->
+    <XaxisSource>Y</XaxisSource>
+    <!--  遥感轴位置 -->
+    <YJoystickGain>10</YJoystickGain>
+    <!--  摇杆控制X左右幅度和方向，1°*JoystickGain  越大幅度越大，反方向用-  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+    <JoystickName>PXN-2113 Pro</JoystickName>
+    <!--  遥感名字  -->
+  </twoAirPlane>
+  <TwoThreeDofRotate>
+    <!--  元宇宙三轴   -->
+    <BothDist>1070</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>1050</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>640</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>200</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1:1</Ratio>
+    <!--  皮带轮比例  -->
+    <BigGear>128</BigGear>
+    <!--  大齿轮数  -->
+    <SmallGear>18</SmallGear>
+    <!--  小齿轮数  -->
+    <GearRatio>28:1</GearRatio>
+    <!--  比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </TwoThreeDofRotate>
+  <CrankRotate>
+    <!--  曲柄加旋转   -->
+    <xUpR>530</xUpR>
+    <!--  侧倾轴 上支点到中心的距离  -->
+    <xDnR>530</xDnR>
+    <!--  侧倾轴 下支点到中心的距离   -->
+    <yUpR>530</yUpR>
+    <!--  俯昂轴 上支点到中心的距离  -->
+    <yDnR>530</yDnR>
+    <!--  俯昂轴 下支点到中心的距离  -->
+    <xUpCrankDist>382.1</xUpCrankDist>
+    <!--  侧倾轴 上摆臂长度   -->
+    <xDnCrankDist>85</xDnCrankDist>
+    <!--  侧倾轴 下摆臂长度   -->
+    <yUpCrankDist>382.1</yUpCrankDist>
+    <!--  俯昂轴 上摆臂长度   -->
+    <yDnCrankDist>85</yDnCrankDist>
+    <!--  俯昂轴 下摆臂长度   -->
+    <H>372.5</H>
+    <!--  高度   -->
+    <GearRatio>28:1</GearRatio>
+    <BigGear>128</BigGear>
+    <!--  大齿轮数  -->
+    <SmallGear>18</SmallGear>
+    <!--  小齿轮数  -->
+    <RotateGearRatio>28:1</RotateGearRatio>
+    <!--  比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </CrankRotate>
+  <TwoCrankRotate>
+    <!--  曲柄加旋转   -->
+    <xUpR>550</xUpR>
+    <!--  侧倾轴 上支点到中心的距离  -->
+    <xDnR>550</xDnR>
+    <!--  侧倾轴 下支点到中心的距离   -->
+    <yUpR>550</yUpR>
+    <!--  俯昂轴 上支点到中心的距离  -->
+    <yDnR>550</yDnR>
+    <!--  俯昂轴 下支点到中心的距离  -->
+    <xUpCrankDist>382.1</xUpCrankDist>
+    <!--  侧倾轴 上摆臂长度   -->
+    <xDnCrankDist>85</xDnCrankDist>
+    <!--  侧倾轴 下摆臂长度   -->
+    <yUpCrankDist>382.1</yUpCrankDist>
+    <!--  俯昂轴 上摆臂长度   -->
+    <yDnCrankDist>85</yDnCrankDist>
+    <!--  俯昂轴 下摆臂长度   -->
+    <H>372.5</H>
+    <!--  高度   -->
+    <GearRatio>40:1</GearRatio>
+    <BigGear>85</BigGear>
+    <!--  大齿轮数  -->
+    <SmallGear>20</SmallGear>
+    <!--  小齿轮数  -->
+    <RotateGearRatio>40:1</RotateGearRatio>
+    <!--  比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </TwoCrankRotate>
+  <sixDofRotate>
+    <!--  元宇宙六轴加旋转  -->
+    <UpR>550</UpR>
+    <!--  上平台半径   -->
+    <DnR>570</DnR>
+    <!--  下平台半径  -->
+    <UpDist>190</UpDist>
+    <!--  上平台短边长度-->
+    <DnDist>190</DnDist>
+    <!--上平台短边长度-->
+    <Ldrive>700</Ldrive>
+    <!--  电动缸初始长度 -->
+    <Lflex>150</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  比例  -->
+    <BigGear>92</BigGear>
+    <!--  大齿轮数  -->
+    <SmallGear>14</SmallGear>
+    <!--  小齿轮数  -->
+    <GearRatio>32:1</GearRatio>
+    <!--  比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </sixDofRotate>
+  <MotorThreeDof>
+    <!--  摩托车三轴   -->
+    <BothDist>320</BothDist>
+    <!--  两侧电动缸之间的距离长度mm   -->
+    <MiddleDist>470</MiddleDist>
+    <!--  中间电缸到其他缸距离   -->
+    <Ldrive>520</Ldrive>
+    <!--  电缸初始高度  -->
+    <Lflex>90</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>5</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  皮带轮比例  -->
+    <XGain>1</XGain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+    <YGain>1</YGain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+    <YOffset>32768</YOffset>
+    <!--  Y轴偏移数据  -->
+  </MotorThreeDof>
+  <RacingSixDof>
+    <!--  赛车六轴   -->
+    <UpR>1000</UpR>
+    <!--  上平台半径   -->
+    <DnR>1000</DnR>
+    <!--  下平台半径  -->
+    <UpDist>290</UpDist>
+    <!--  上平台短边长度-->
+    <DnDist>290</DnDist>
+    <!--上平台短边长度-->
+    <Ldrive>1100</Ldrive>
+    <!--  电动缸初始长度 -->
+    <Lflex>400</Lflex>
+    <!--  电缸行程   -->
+    <Pitch>10</Pitch>
+    <!--  电缸丝杆导程  -->
+    <Ratio>1:1</Ratio>
+    <!--  比例  -->
+    <Gain>1</Gain>
+    <!--  动作幅度增益支持小数点，1为正常，小于1幅度减小，大于1幅度加大  -->
+  </RacingSixDof>
+</Content>

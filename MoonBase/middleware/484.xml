@@ -1,0 +1,446 @@
+<Content>
+  <OneThreeDof>
+    <!--  鍗曚汉铔嬫涓夎酱   -->
+    <BothDist>461</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>440</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>500</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>140</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </OneThreeDof>
+  <TwoThreeDof>
+    <!--  鍙屼汉铔嬫涓夎酱   -->
+    <BothDist>980</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>630</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>460</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>120</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </TwoThreeDof>
+  <Two2ThreeDof>
+    <!--  绁炲窞椋炶埞涓夎酱   -->
+    <BothDist>980</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>950</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>530</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>120</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </Two2ThreeDof>
+  <Two3ThreeDof>
+    <!--  鏆楅粦椋炶埞涓夎酱   -->
+    <BothDist>1400</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>820</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>550</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>150</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </Two3ThreeDof>
+  <Two4ThreeDof>
+    <!--  鎽╂墭杞︿笁杞?  -->
+    <BothDist>310</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>480</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>450</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>100</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </Two4ThreeDof>
+  <Two5ThreeDof>
+    <!--  VR璧涜溅涓夎酱   -->
+    <BothDist>700</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>1000</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>400</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>130</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+    <XaxisSource>X</XaxisSource>
+    <!--  閬ユ劅杞翠綅缃?-->
+    <XJoystickGain>-10</XJoystickGain>
+    <!--  鎽囨潌鎺у埗X宸﹀彸骞呭害鍜屾柟鍚戯紝1掳*JoystickGain  瓒婂ぇ骞呭害瓒婂ぇ锛屽弽鏂瑰悜鐢?  -->
+    <XOffset>0</XOffset>
+    <!--  	X杞村亸绉绘暟鎹? -->
+    <YaxisSource>Z</YaxisSource>
+    <!--  閬ユ劅杞翠綅缃?-->
+    <YJoystickGain>10</YJoystickGain>
+    <!--  鎽囨潌鎺у埗X宸﹀彸骞呭害鍜屾柟鍚戯紝1掳*JoystickGain  瓒婂ぇ骞呭害瓒婂ぇ锛屽弽鏂瑰悜鐢?  -->
+    <YOffset>0</YOffset>
+    <!--  	X杞村亸绉绘暟鎹? -->
+    <JoystickName>Logitech G29 Driving Force Racing Wheel USB</JoystickName>
+    <!--  閬ユ劅鍚嶅瓧  -->
+  </Two5ThreeDof>
+  <Two6ThreeDof>
+    <!--  涓夊睆璧涜溅涓夎酱   -->
+    <BothDist>1320</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>1350</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>830</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>250</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </Two6ThreeDof>
+  <Twocrank>
+    <!--  鍙屼汉鏇叉焺   -->
+    <BothDist>800</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>500</MiddleDist>
+    <!--  鏇叉焺鍒版敮鎾戣酱鐨勮窛绂?  -->
+    <UpCrankDist>370</UpCrankDist>
+    <!--  涓婃憜鑷傞暱搴?  -->
+    <DnCrankDist>60</DnCrankDist>
+    <!--   涓嬫憜鑷傞暱搴?  -->
+    <H>510</H>
+    <!--  鏀拺杞撮珮搴?  -->
+    <GearRatio>40:1</GearRatio>
+    <!--  鍙橀€熺榻挎瘮-->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </Twocrank>
+  <FourThreeDof>
+    <!--  鍥涗汉涓夎酱   -->
+    <BothDist>700</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>965</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>550</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>180</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  姣斾緥  -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </FourThreeDof>
+  <Fourcrank>
+    <!--  鍥涗汉鏇叉焺   -->
+    <BothDist>980</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>630</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <UpCrankDist>382.1</UpCrankDist>
+    <!--  涓婃憜鑷傞暱搴?  -->
+    <DnCrankDist>85</DnCrankDist>
+    <!--   涓嬫憜鑷傞暱搴?  -->
+    <H>372.5</H>
+    <!--  鏀拺杞撮珮搴?  -->
+    <GearRatio>45:1</GearRatio>
+    <!--  鍙橀€熺榻挎瘮-->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </Fourcrank>
+  <SixDof>
+    <!--  鍏酱   -->
+    <UpR>550</UpR>
+    <!--  涓婂钩鍙板崐寰?  -->
+    <DnR>570</DnR>
+    <!--  涓嬪钩鍙板崐寰? -->
+    <UpDist>190</UpDist>
+    <!--  涓婂钩鍙扮煭杈归暱搴?->
+    <DnDist>190</DnDist>
+    <!--涓婂钩鍙扮煭杈归暱搴?->
+    <Ldrive>700</Ldrive>
+    <!--  鐢靛姩缂稿垵濮嬮暱搴?-->
+    <Lflex>150</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  姣斾緥  -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </SixDof>
+  <Sixcrank>
+    <!--  鍏汉鏇叉焺  -->
+    <xUpR>530</xUpR>
+    <!--  渚у€捐酱 涓婃敮鐐瑰埌涓績鐨勮窛绂? -->
+    <xDnR>530</xDnR>
+    <!--  渚у€捐酱 涓嬫敮鐐瑰埌涓績鐨勮窛绂?  -->
+    <yUpR>530</yUpR>
+    <!--  淇槀杞?涓婃敮鐐瑰埌涓績鐨勮窛绂? -->
+    <yDnR>530</yDnR>
+    <!--  淇槀杞?涓嬫敮鐐瑰埌涓績鐨勮窛绂? -->
+    <xUpCrankDist>382.1</xUpCrankDist>
+    <!--  渚у€捐酱 涓婃憜鑷傞暱搴?  -->
+    <xDnCrankDist>85</xDnCrankDist>
+    <!--  渚у€捐酱 涓嬫憜鑷傞暱搴?  -->
+    <yUpCrankDist>382.1</yUpCrankDist>
+    <!--  淇槀杞?涓婃憜鑷傞暱搴?  -->
+    <yDnCrankDist>85</yDnCrankDist>
+    <!--  淇槀杞?涓嬫憜鑷傞暱搴?  -->
+    <H>372.5</H>
+    <!--  楂樺害   -->
+    <GearRatio>45:1</GearRatio>
+    <!--  鍙橀€熺榻挎瘮-->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </Sixcrank>
+  <One360>
+    <!--  鍗曚汉360   -->
+    <Ldrive>400</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>150</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  姣斾緥  -->
+    <BigGear>50</BigGear>
+    <!--  澶ч娇杞暟  -->
+    <SmallGear>3</SmallGear>
+    <!--  灏忛娇杞暟  -->
+    <GearRatio>40:1</GearRatio>
+    <!--  姣斾緥  -->
+    <AxisSequence>1</AxisSequence>
+    <!--  杞村簭锛?锛?鍙风數缂革紝2鍙锋棆杞級锛?1锛?鍙风數缂革紝1鍙锋棆杞級-->
+  </One360>
+  <Two360>
+    <!--  鍙屼汉360   -->
+    <Ldrive>750</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>250</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  姣斾緥  -->
+    <BigGear>85</BigGear>
+    <!--  澶ч娇杞暟  -->
+    <SmallGear>24</SmallGear>
+    <!--  灏忛娇杞暟  -->
+    <GearRatio>13600:147</GearRatio>
+    <!--  姣斾緥  -->
+    <AxisSequence>1</AxisSequence>
+    <!--  杞村簭锛?锛?鍙风數缂革紝2鍙锋棆杞級锛?1锛?鍙风數缂革紝1鍙锋棆杞級-->
+  </Two360>
+  <AirPlane>
+    <!-- 鍗曚汉灏忛鏈猴紙閬ユ劅鎺у埗鍔ㄤ綔锛?  -->
+    <BothDist>525</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>663</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>450</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>60</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1:1.5</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <XJoystickGain>-10</XJoystickGain>
+    <!--  鎽囨潌鎺у埗X宸﹀彸骞呭害鍜屾柟鍚戯紝1掳*JoystickGain  瓒婂ぇ骞呭害瓒婂ぇ锛屽弽鏂瑰悜鐢?  -->
+    <XOffset>0</XOffset>
+    <!--  	X杞村亸绉绘暟鎹? -->
+    <YJoystickGain>10</YJoystickGain>
+    <!--  鎽囨潌鎺у埗X宸﹀彸骞呭害鍜屾柟鍚戯紝1掳*JoystickGain  瓒婂ぇ骞呭害瓒婂ぇ锛屽弽鏂瑰悜鐢?  -->
+    <YOffset>0</YOffset>
+    <!--  	Y杞村亸绉绘暟鎹? -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+    <JoystickName>PXN-2113 Pro</JoystickName>
+    <!--  閬ユ劅鍚嶅瓧  -->
+  </AirPlane>
+  <twoAirPlane>
+    <!--  鍙屼汉灏忛鏈猴紙閬ユ劅鎺у埗鍔ㄤ綔锛?  -->
+    <BothDist>650</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>700</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>450</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>60</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1:1.5</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <XaxisSource>X</XaxisSource>
+    <!--  閬ユ劅杞翠綅缃?-->
+    <XJoystickGain>-10</XJoystickGain>
+    <!--  鎽囨潌鎺у埗X宸﹀彸骞呭害鍜屾柟鍚戯紝1掳*JoystickGain  瓒婂ぇ骞呭害瓒婂ぇ锛屽弽鏂瑰悜鐢?  -->
+    <XaxisSource>Y</XaxisSource>
+    <!--  閬ユ劅杞翠綅缃?-->
+    <YJoystickGain>10</YJoystickGain>
+    <!--  鎽囨潌鎺у埗X宸﹀彸骞呭害鍜屾柟鍚戯紝1掳*JoystickGain  瓒婂ぇ骞呭害瓒婂ぇ锛屽弽鏂瑰悜鐢?  -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+    <JoystickName>PXN-2113 Pro</JoystickName>
+    <!--  閬ユ劅鍚嶅瓧  -->
+  </twoAirPlane>
+  <TwoThreeDofRotate>
+    <!--  鍏冨畤瀹欎笁杞?  -->
+    <BothDist>1070</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>1050</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>640</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>200</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <BigGear>128</BigGear>
+    <!--  澶ч娇杞暟  -->
+    <SmallGear>18</SmallGear>
+    <!--  灏忛娇杞暟  -->
+    <GearRatio>28:1</GearRatio>
+    <!--  姣斾緥  -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </TwoThreeDofRotate>
+  <CrankRotate>
+    <!--  鏇叉焺鍔犳棆杞?  -->
+    <xUpR>500</xUpR>
+    <!--  渚у€捐酱 涓婃敮鐐瑰埌涓績鐨勮窛绂? -->
+    <xDnR>500</xDnR>
+    <!--  渚у€捐酱 涓嬫敮鐐瑰埌涓績鐨勮窛绂?  -->
+    <yUpR>500</yUpR>
+    <!--  淇槀杞?涓婃敮鐐瑰埌涓績鐨勮窛绂? -->
+    <yDnR>500</yDnR>
+    <!--  淇槀杞?涓嬫敮鐐瑰埌涓績鐨勮窛绂? -->
+    <xUpCrankDist>370</xUpCrankDist>
+    <!--  渚у€捐酱 涓婃憜鑷傞暱搴?  -->
+    <xDnCrankDist>85</xDnCrankDist>
+    <!--  渚у€捐酱 涓嬫憜鑷傞暱搴?  -->
+    <yUpCrankDist>370</yUpCrankDist>
+    <!--  淇槀杞?涓婃憜鑷傞暱搴?  -->
+    <yDnCrankDist>85</yDnCrankDist>
+    <!--  淇槀杞?涓嬫憜鑷傞暱搴?  -->
+    <H>370</H>
+    <!--  楂樺害   -->
+    <GearRatio>45:1</GearRatio>
+    <BigGear>123</BigGear>
+    <!--  澶ч娇杞暟  -->
+    <SmallGear>16</SmallGear>
+    <!--  灏忛娇杞暟  -->
+    <RotateGearRatio>28:1</RotateGearRatio>
+    <!--  姣斾緥  -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </CrankRotate>
+  <sixDofRotate>
+    <!--  鍏冨畤瀹欏叚杞村姞鏃嬭浆  -->
+    <UpR>550</UpR>
+    <!--  涓婂钩鍙板崐寰?  -->
+    <DnR>570</DnR>
+    <!--  涓嬪钩鍙板崐寰? -->
+    <UpDist>190</UpDist>
+    <!--  涓婂钩鍙扮煭杈归暱搴?->
+    <DnDist>190</DnDist>
+    <!--涓婂钩鍙扮煭杈归暱搴?->
+    <Ldrive>700</Ldrive>
+    <!--  鐢靛姩缂稿垵濮嬮暱搴?-->
+    <Lflex>180</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  姣斾緥  -->
+    <BigGear>92</BigGear>
+    <!--  澶ч娇杞暟  -->
+    <SmallGear>14</SmallGear>
+    <!--  灏忛娇杞暟  -->
+    <GearRatio>32:1</GearRatio>
+    <!--  姣斾緥  -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </sixDofRotate>
+  <MotorThreeDof>
+    <!--  鎽╂墭杞︿笁杞?  -->
+    <BothDist>320</BothDist>
+    <!--  涓や晶鐢靛姩缂镐箣闂寸殑璺濈闀垮害mm   -->
+    <MiddleDist>470</MiddleDist>
+    <!--  涓棿鐢电几鍒板叾浠栫几璺濈   -->
+    <Ldrive>520</Ldrive>
+    <!--  鐢电几鍒濆楂樺害  -->
+    <Lflex>90</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  鐨甫杞瘮渚? -->
+    <XGain>1</XGain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+    <YGain>1</YGain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+    <YOffset>32768</YOffset>
+    <!--  Y杞村亸绉绘暟鎹? -->
+  </MotorThreeDof>
+  <RacingSixDof>
+    <!--  璧涜溅鍏酱   -->
+    <UpR>1000</UpR>
+    <!--  涓婂钩鍙板崐寰?  -->
+    <DnR>1000</DnR>
+    <!--  涓嬪钩鍙板崐寰? -->
+    <UpDist>290</UpDist>
+    <!--  涓婂钩鍙扮煭杈归暱搴?->
+    <DnDist>290</DnDist>
+    <!--涓婂钩鍙扮煭杈归暱搴?->
+    <Ldrive>1100</Ldrive>
+    <!--  鐢靛姩缂稿垵濮嬮暱搴?-->
+    <Lflex>400</Lflex>
+    <!--  鐢电几琛岀▼   -->
+    <Pitch>5</Pitch>
+    <!--  鐢电几涓濇潌瀵肩▼  -->
+    <Ratio>1.5:1</Ratio>
+    <!--  姣斾緥  -->
+    <Gain>1</Gain>
+    <!--  鍔ㄤ綔骞呭害澧炵泭鏀寔灏忔暟鐐癸紝1涓烘甯革紝灏忎簬1骞呭害鍑忓皬锛屽ぇ浜?骞呭害鍔犲ぇ  -->
+  </RacingSixDof>
+</Content>
