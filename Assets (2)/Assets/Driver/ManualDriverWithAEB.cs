@@ -23,6 +23,14 @@ namespace MoonRover.Driver
         [Tooltip("油门释放平滑速度（越大越快跟上）")]
         public float releaseSmoothing = 5f;
 
+        [Header("通用手柄")]
+        [Tooltip("未连接 G29 时，使用 Unity 的通用手柄轴控制月球车。")]
+        public bool useGenericGamepad = true;
+        [Tooltip("通用手柄刹车按钮，默认按钮 0。")]
+        public int gamepadBrakeButton = 0;
+        [Tooltip("通用手柄手刹按钮，默认按钮 1。")]
+        public int gamepadHandbrakeButton = 1;
+
         [Header("UI 引用 (由 UISetupWizard 绑定)")]
         public Text aebAlertText;
         public Image aebOverlayImage;
@@ -89,7 +97,11 @@ namespace MoonRover.Driver
                 v = Input.GetAxis("Vertical");
                 // S / ↓ = 脚刹（高速刹车，低速自动切倒车）
                 footbrake = (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) ? 1f : 0f;
+                if (useGenericGamepad && HasGamepad() && IsJoystickButtonPressed(gamepadBrakeButton))
+                    footbrake = 1f;
                 handbrake = Input.GetKey(KeyCode.Space) ? 1f : 0f;
+                if (useGenericGamepad && HasGamepad() && IsJoystickButtonPressed(gamepadHandbrakeButton))
+                    handbrake = 1f;
             }
 
             // 平滑油门释放：释放时慢慢归零，避免急停
@@ -194,6 +206,25 @@ namespace MoonRover.Driver
             if (Mathf.Abs(value) < inputDeadzone) return 0f;
             // 将 [deadzone, 1] 重新映射到 [0, 1]
             return Mathf.Sign(value) * (Mathf.Abs(value) - inputDeadzone) / (1f - inputDeadzone);
+        }
+
+        private bool HasGamepad()
+        {
+            string[] names = Input.GetJoystickNames();
+            if (names == null) return false;
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(names[i])) return true;
+            }
+
+            return false;
+        }
+
+        private bool IsJoystickButtonPressed(int buttonIndex)
+        {
+            if (buttonIndex < 0 || buttonIndex > 19) return false;
+            return Input.GetKey((KeyCode)((int)KeyCode.JoystickButton0 + buttonIndex));
         }
 
         void UpdateAEBAlert()

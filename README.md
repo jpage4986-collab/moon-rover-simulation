@@ -17,6 +17,17 @@
 4. 用键盘 `1/2/3` 或界面按钮切换手动、局部 AI、混合 AI 模式。
 5. 无实体底座时，将 `MotionPlatformController.enablePlatform` 关闭；有实体底座时，先按 `docs/TESTING.md` 的顺序启动和验证中间件。
 
+## 手柄控制 Unity 月球车
+
+项目已支持 Windows 识别的通用 USB/Bluetooth 手柄。连接手柄后打开 `SampleScene`，点击 Play 并切换到手动模式：
+
+- 左摇杆 X 轴：转向；左摇杆 Y 轴：前进/后退。
+- 按钮 0：脚刹；按钮 1：手刹。
+- 场景中会显示手柄名称、两个轴的实时数值和当前按下的按钮编号，便于确认手柄是否被 Unity 识别。
+- 如果要只测试电脑里的虚拟月球车，请先关闭 `MotionPlatformController.enablePlatform`；否则 Unity 仍可能把车辆姿态发送给实体 Mbox 平台。
+
+若手柄的按钮编号不同，可在 `car` 对象的 `ManualDriverWithAEB` 组件中修改 `gamepadBrakeButton` 和 `gamepadHandbrakeButton`。
+
 ## 通信链路
 
 ```text
