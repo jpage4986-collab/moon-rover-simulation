@@ -11,6 +11,7 @@ namespace MoonRover.FeedBack
 
         [Header("UI 引用")]
         public Text speedText;
+        public Text centerSpeedText;
         public Text distanceText;
         public Text fvText;
         public Text steerText;
@@ -46,6 +47,9 @@ namespace MoonRover.FeedBack
         {
             if (speedText != null)
                 speedText.text = "车速: " + (speed * 3.6f).ToString("F1") + " km/h";
+
+            if (centerSpeedText != null)
+                centerSpeedText.text = (speed * 3.6f).ToString("F1");
 
             if (distanceText != null)
                 distanceText.text = "里程: " + distance.ToString("F1") + " m";

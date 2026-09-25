@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using MoonRover.Driver;
 using MoonRover.FeedBack;
 using MoonRover.Vision;
@@ -12,18 +13,18 @@ using MoonRover.Navigation;
 using UnityStandardAssets.Vehicles.Car;
 
 /// <summary>
-/// MoonRover UI 生成器 — SpaceX 极简 HUD 风格
-/// 设计原则: 纯黑背景 + 白/灰极简边框 + 幽灵描边按钮 + 数据优先
+/// MoonRover UI 生成器 — 月面任务控制台 HUD
+/// 设计原则: 深蓝黑底 + 冷青测量色 + 琥珀警告 + 红色危险 + 数据优先
 /// </summary>
 public class UISetupWizard : EditorWindow
 {
     // ══════════════════════════════════════════════════
     //  布局常量 (7680×2160 超宽屏 32:9)
     //  左列: Mode(200) → Status(340) → Telemetry(800)  [640px 统一宽]
-    //  右列: Map(580) → Cam(580) → SysStatus(360)      [580px 统一宽]
+    //  右列: Map(500) → Cam(500) → SysStatus(300)      [760px 统一宽]
     // ══════════════════════════════════════════════════
-    const int REF_WIDTH = 7680;
-    const int REF_HEIGHT = 2160;
+    const int REF_WIDTH = 1920;
+    const int REF_HEIGHT = 1080;
     const int MARGIN = 60;
     const int PANEL_GAP = 30;
 
@@ -38,48 +39,78 @@ public class UISetupWizard : EditorWindow
     static readonly Vector2 TELEMETRY_PANEL_POS   = new Vector2(MARGIN, -(STATUS_BOTTOM + PANEL_GAP));
     static readonly Vector2 TELEMETRY_PANEL_SIZE  = new Vector2(COL1_W, 800);
 
-    // ── 右列 (580px 宽, 右上锚定) ──
-    const int COL2_W = 580;
+    // ── 右列 (760px 宽, 右上锚定) ──
+    const int COL2_W = 760;
     static readonly Vector2 MAP_PANEL_POS         = new Vector2(-MARGIN, -MARGIN);
-    static readonly Vector2 MAP_PANEL_SIZE        = new Vector2(COL2_W, 580);
-    const int MAP_BOTTOM = MARGIN + 580;
+    static readonly Vector2 MAP_PANEL_SIZE        = new Vector2(COL2_W, 500);
+    const int MAP_BOTTOM = MARGIN + 500;
     static readonly Vector2 CAM_PANEL_POS         = new Vector2(-MARGIN, -(MAP_BOTTOM + PANEL_GAP));
-    static readonly Vector2 CAM_PANEL_SIZE        = new Vector2(COL2_W, 580);
-    const int CAM_BOTTOM = MAP_BOTTOM + PANEL_GAP + 580;
+    static readonly Vector2 CAM_PANEL_SIZE        = new Vector2(COL2_W, 500);
+    const int CAM_BOTTOM = MAP_BOTTOM + PANEL_GAP + 500;
     static readonly Vector2 SYSSTATUS_PANEL_POS   = new Vector2(-MARGIN, -(CAM_BOTTOM + PANEL_GAP));
-    static readonly Vector2 SYSSTATUS_PANEL_SIZE  = new Vector2(COL2_W, 360);
-    const int SYS_BOTTOM = CAM_BOTTOM + PANEL_GAP + 360;
+    static readonly Vector2 SYSSTATUS_PANEL_SIZE  = new Vector2(COL2_W, 300);
+    const int SYS_BOTTOM = CAM_BOTTOM + PANEL_GAP + 300;
     static readonly Vector2 BATT_PANEL_POS        = new Vector2(-MARGIN, -(SYS_BOTTOM + PANEL_GAP));
-    static readonly Vector2 BATT_PANEL_SIZE       = new Vector2(COL2_W, 180);
-    const int BATT_BOTTOM = SYS_BOTTOM + PANEL_GAP + 180;
+    static readonly Vector2 BATT_PANEL_SIZE       = new Vector2(COL2_W, 150);
+    const int BATT_BOTTOM = SYS_BOTTOM + PANEL_GAP + 150;
     static readonly Vector2 EVENTLOG_PANEL_POS    = new Vector2(-MARGIN, -(BATT_BOTTOM + PANEL_GAP));
-    static readonly Vector2 EVENTLOG_PANEL_SIZE  = new Vector2(COL2_W, 220);
+    static readonly Vector2 EVENTLOG_PANEL_SIZE  = new Vector2(COL2_W, 180);
 
     // ── 罗盘条 (顶边居中) ──
     const int COMPASS_BAR_W = 800;
     const int COMPASS_BAR_H = 60;
 
     // ══════════════════════════════════════════════════
-    //  配色方案 — SpaceX 极简风格 (纯黑 + 白/灰)
+    //  配色方案 — Lunar Ops Console / Devdog Sci-Fi UI
     // ══════════════════════════════════════════════════
-    static readonly Color COL_BG          = new Color(0f, 0f, 0f, 1f);       // Pure black (SpaceX)
-    static readonly Color COL_BG_GRADIENT = new Color(0f, 0f, 0f, 1f);       // Solid black — no gradient
-    static readonly Color COL_ACCENT      = new Color(1f, 1f, 1f, 1f);       // White (was cyan)
-    static readonly Color COL_ACCENT_DIM  = new Color(0.65f, 0.65f, 0.65f, 0.7f); // Light gray
-    static readonly Color COL_ACCENT_GLOW = new Color(1f, 1f, 1f, 0.3f);     // White glow (was cyan)
-    static readonly Color COL_TITLE       = new Color(1f, 1f, 1f, 1f);       // White titles
-    static readonly Color COL_VALUE       = new Color(0.3f, 1f, 0.3f, 1f);   // Keep green (functional HUD)
-    static readonly Color COL_WARN        = new Color(1f, 0.75f, 0.1f, 1f);  // Keep yellow
-    static readonly Color COL_ALERT       = new Color(1f, 0.2f, 0.15f, 1f);  // Keep red
-    static readonly Color COL_TEXT        = new Color(1f, 1f, 1f, 1f);       // Pure white
-    static readonly Color COL_TEXT_DIM    = new Color(0.6f, 0.6f, 0.6f, 1f); // Medium gray
-    static readonly Color COL_BORDER      = new Color(1f, 1f, 1f, 0.5f);     // White border (was cyan)
+    static readonly Color COL_BG          = new Color(0.006f, 0.014f, 0.021f, 1f);
+    static readonly Color COL_BG_GRADIENT = new Color(0.018f, 0.055f, 0.072f, 1f);
+    static readonly Color COL_PANEL       = new Color(0.008f, 0.024f, 0.034f, 0.95f);
+    static readonly Color COL_SUBPANEL    = new Color(0.004f, 0.015f, 0.023f, 0.96f);
+    static readonly Color COL_ACCENT      = new Color(0.36f, 0.92f, 1f, 1f);
+    static readonly Color COL_ACCENT_DIM  = new Color(0.25f, 0.55f, 0.62f, 0.8f);
+    static readonly Color COL_ACCENT_GLOW = new Color(0.25f, 0.85f, 0.92f, 0.18f);
+    static readonly Color COL_TITLE       = new Color(0.88f, 0.97f, 0.98f, 1f);
+    static readonly Color COL_VALUE       = new Color(0.55f, 0.96f, 0.88f, 1f);
+    static readonly Color COL_WARN        = new Color(1f, 0.69f, 0.28f, 1f);
+    static readonly Color COL_ALERT       = new Color(1f, 0.32f, 0.36f, 1f);
+    static readonly Color COL_TEXT        = new Color(0.82f, 0.92f, 0.94f, 1f);
+    static readonly Color COL_TEXT_DIM    = new Color(0.43f, 0.62f, 0.67f, 1f);
+    static readonly Color COL_BORDER      = new Color(0.25f, 0.65f, 0.72f, 0.42f);
 
     static Font _uiFont;
+    static Font _techFont;
     static Texture2D _gridTex;
+    static Sprite _devdogTopLine;
+    static Sprite _devdogTopLineThick;
+    static Sprite _devdogBottomLine;
+    static Sprite _devdogStripes;
+    static Sprite _devdogHexFrame;
+    static Texture2D _modularAtlas;
+    static Texture2D _radarReplacement;
+    static Texture2D _modeFrame;
+    static Texture2D _telemetryFrame;
+    static Texture2D _mapFrame;
+    static Texture2D _hazCamFrame;
+    static Texture2D _statusFrame;
+    static Texture2D _driveModeKeyboardIcon;
+    static Texture2D _driveModeJoystickIcon;
+    static Texture2D _driveModeSteeringWheelIcon;
+
+    const string DEV_DOG_ROOT = "Assets/ThirdParty/DevdogSciFiUI/Devdog/SciFiDesign/FirstVersion/";
+    const string MODULAR_ATLAS_PATH = "Assets/UI/Generated/MoonRover_ModularHUD.png";
+    const string RADAR_REPLACEMENT_PATH = "Assets/UI/Generated/RadarReplacement.png";
+    const string MODE_FRAME_PATH = "Assets/UI/Generated/ModeFrameGenerated.png";
+    const string TELEMETRY_FRAME_PATH = "Assets/UI/Generated/TelemetryFrameGenerated.png";
+    const string MAP_FRAME_PATH = "Assets/UI/Generated/MapFrameGenerated.png";
+    const string HAZCAM_FRAME_PATH = "Assets/UI/Generated/HazCamFrameGenerated.png";
+    const string STATUS_FRAME_PATH = "Assets/UI/Generated/StatusFrameGenerated.png";
+    const string DRIVE_MODE_KEYBOARD_ICON_PATH = "Assets/UI/Generated/DriveModeKeyboardIcon.png";
+    const string DRIVE_MODE_JOYSTICK_ICON_PATH = "Assets/UI/Generated/DriveModeJoystickIcon.png";
+    const string DRIVE_MODE_STEERING_WHEEL_ICON_PATH = "Assets/UI/Generated/DriveModeSteeringWheelIcon.png";
 
     // ── 圆角缓存 ──
-    const int ROUND_RADIUS = 36;
+    const int ROUND_RADIUS = 22;
     const float BORDER_AA_WIDTH = 1.5f;
     static Dictionary<Vector2Int, Texture2D> _roundedBorderCache = new Dictionary<Vector2Int, Texture2D>();
     static Dictionary<Vector2Int, Texture2D> _roundedFillCache = new Dictionary<Vector2Int, Texture2D>();
@@ -98,37 +129,106 @@ public class UISetupWizard : EditorWindow
         return _uiFont;
     }
 
+    static Font GetTechFont()
+    {
+        if (_techFont != null) return _techFont;
+        _techFont = AssetDatabase.LoadAssetAtPath<Font>(DEV_DOG_ROOT + "Fonts/Orbitron/Orbitron-Regular.ttf");
+        return _techFont != null ? _techFont : GetCJKFont();
+    }
+
+    static Font GetTextFont(string value)
+    {
+        // Orbitron gives telemetry and English labels the Devdog engineering look;
+        // Chinese stays on the system font so it remains readable.
+        bool hasCjk = !string.IsNullOrEmpty(value) && value.Any(c => c >= 0x2E80 && c <= 0x9FFF);
+        return hasCjk ? GetCJKFont() : GetTechFont();
+    }
+
+    static Sprite LoadDevdogSprite(string relativePath)
+    {
+        return AssetDatabase.LoadAssetAtPath<Sprite>(DEV_DOG_ROOT + relativePath);
+    }
+
+    static Texture2D LoadDevdogTexture(string relativePath)
+    {
+        return AssetDatabase.LoadAssetAtPath<Texture2D>(DEV_DOG_ROOT + relativePath);
+    }
+
     static void EnsureTextures()
     {
-        if (_gridTex != null) return;
-        _gridTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Kenney/Generated/GridPattern.png");
-        if (_gridTex == null) { SciFiTextureGen.GenerateAll(); _gridTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Kenney/Generated/GridPattern.png"); }
+        if (_gridTex == null)
+        {
+            _gridTex = LoadDevdogTexture("Images/HexPattern.psd");
+            if (_gridTex == null)
+            {
+                _gridTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Kenney/Generated/GridPattern.png");
+                if (_gridTex == null)
+                {
+                    SciFiTextureGen.GenerateAll();
+                    _gridTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Kenney/Generated/GridPattern.png");
+                }
+            }
+        }
+
+        _devdogTopLine = _devdogTopLine ?? LoadDevdogSprite("Images/Hud/TopCenterRound.png");
+        _devdogTopLineThick = _devdogTopLineThick ?? LoadDevdogSprite("Images/Hud/TopCenterRoundThick.png");
+        _devdogBottomLine = _devdogBottomLine ?? LoadDevdogSprite("Images/Hud/LowerBarLeftHalf.png");
+        _devdogStripes = _devdogStripes ?? LoadDevdogSprite("Images/Hud/StripesHorizontal.png");
+        _devdogHexFrame = _devdogHexFrame ?? LoadDevdogSprite("Images/Hud/Radial/HexagonBorder1Thick.png");
+    }
+
+    static void EnsureModularAtlas()
+    {
+        _modularAtlas = AssetDatabase.LoadAssetAtPath<Texture2D>(MODULAR_ATLAS_PATH);
+        if (_modularAtlas == null)
+        {
+            Debug.LogWarning("[UI] 未找到模块化 HUD 素材: " + MODULAR_ATLAS_PATH);
+        }
+        _radarReplacement = AssetDatabase.LoadAssetAtPath<Texture2D>(RADAR_REPLACEMENT_PATH);
+        _modeFrame = AssetDatabase.LoadAssetAtPath<Texture2D>(MODE_FRAME_PATH);
+        _telemetryFrame = AssetDatabase.LoadAssetAtPath<Texture2D>(TELEMETRY_FRAME_PATH);
+        _mapFrame = AssetDatabase.LoadAssetAtPath<Texture2D>(MAP_FRAME_PATH);
+        _hazCamFrame = AssetDatabase.LoadAssetAtPath<Texture2D>(HAZCAM_FRAME_PATH);
+        _statusFrame = AssetDatabase.LoadAssetAtPath<Texture2D>(STATUS_FRAME_PATH);
+        _driveModeKeyboardIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(DRIVE_MODE_KEYBOARD_ICON_PATH);
+        _driveModeJoystickIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(DRIVE_MODE_JOYSTICK_ICON_PATH);
+        _driveModeSteeringWheelIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(DRIVE_MODE_STEERING_WHEEL_ICON_PATH);
     }
 
     // ══════════════════════════════════════════════════
     //  窗口
     // ══════════════════════════════════════════════════
 
-    [MenuItem("Tools/MoonRover/一键生成UI (7680x2160)")]
+    [MenuItem("Tools/MoonRover/一键生成UI (1920x1080 模块化)")]
     public static void ShowWindow() => GetWindow<UISetupWizard>("MoonRover UI");
+
+    [MenuItem("Tools/MoonRover/生成 Lunar Ops Console UI")]
+    public static void GenerateAllUIFromBatch()
+    {
+        const string scenePath = "Assets/Scenes/SampleScene.unity";
+        var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+        var wizard = CreateInstance<UISetupWizard>();
+        wizard.GenerateAllUI();
+        EditorSceneManager.SaveScene(scene);
+        DestroyImmediate(wizard);
+        Debug.Log("Lunar Ops Console UI 已生成并保存到 " + scenePath);
+    }
 
     void OnGUI()
     {
         GUILayout.Space(10);
-        GUILayout.Label("MoonRover UI — SpaceX 极简 HUD", EditorStyles.boldLabel);
+        GUILayout.Label("MoonRover UI — Lunar Ops Console", EditorStyles.boldLabel);
         GUILayout.Space(8);
         if (GUILayout.Button("一键生成全部 UI", GUILayout.Height(40))) GenerateAllUI();
         GUILayout.Space(3);
         if (GUILayout.Button("清除旧 UI", GUILayout.Height(24))) ClearOldUI();
         GUILayout.Space(8);
         EditorGUILayout.HelpBox(
-            "设计方向: SpaceX 极简 HUD — 纯黑 + 白/灰 + 圆角\n" +
-            "· 纯黑底色 (#000000) + 白色圆角边框 (SDF 抗锯齿)\n" +
-            "· 极淡网格 (仅大面板, 4% 透明度)\n" +
-            "· Apple 风格圆角 (36px radius)\n" +
-            "· 幽灵描边按钮 (Ghost Pill)\n" +
-            "· 功能保留: 绿色数据 / 黄色警告 / 红色警报\n" +
-            "· 保留中文字体 (微软雅黑)",
+            "设计方向: 月面任务控制台 — 深蓝黑 + 冷青 + 琥珀\n" +
+            "· 中央驾驶视野优先，边缘信息快速扫描\n" +
+            "· 面板采用冷青细线和轻微层次，不使用大面积纯白\n" +
+            "· 功能保留: 姿态 / 悬挂 / 地图 / 摄像头 / 通信 / 警报\n" +
+            "· 中文使用微软雅黑，数字和英文沿用清晰的工程字体",
             MessageType.Info);
     }
 
@@ -146,7 +246,8 @@ public class UISetupWizard : EditorWindow
             "TelemetryPanel", "SystemStatusPanel",
             "MapCrossH", "MapCrossV", "MapFrame", "PulseDot", "PulseRing",
             "RingExpand", "SweepLine", "CenterRing", "MapAnimations",
-            "OuterGlow", "InnerBorder" };
+            "OuterGlow", "InnerBorder", "CompassBar", "BatteryPanel",
+            "EventLogPanel", "AEBAlertOverlay" };
         foreach (string n in names)
             foreach (GameObject o in FindObjectsOfType<GameObject>().Where(x => x.name == n))
                 DestroyImmediate(o);
@@ -168,29 +269,30 @@ public class UISetupWizard : EditorWindow
     void GenerateAllUI()
     {
         ClearOldUI();
-        EnsureTextures();
+        EnsureModularAtlas();
         var car = FindCar();
         if (car == null) { EditorUtility.DisplayDialog("错误", "找不到 CarController 车辆", "确定"); return; }
         var canvas = CreateCanvas();
-        GenerateModePanel(canvas, car);
-        GenerateStatusPanel(canvas, car);
-        GenerateTelemetryPanel(canvas, car);
-        GenerateSystemStatusPanel(canvas, car);
-        GenerateMapPanel(canvas, car);
-        GenerateCameraPanel(canvas, car);
-        GenerateCompassBar(canvas, car);
-        GenerateBatteryPanel(canvas, car);
-        GenerateEventLogPanel(canvas, car);
-        GenerateAlertOverlay(canvas, car);
-
-        // ── 新组件挂载到车辆 ──
-        car.GetOrAddComponent<HUDDashboard>();
-        car.GetOrAddComponent<MiniAttitudeIndicator>();
-        car.GetOrAddComponent<WheelSlipIndicator>();
-        car.GetOrAddComponent<TerrainProfile>();
+        var modular = canvas.AddComponent<GeneratedConsoleHUD>();
+        modular.modularAtlas = _modularAtlas;
+        modular.modeFrame = _modeFrame;
+        modular.telemetryFrame = _telemetryFrame;
+        modular.mapFrame = _mapFrame;
+        modular.hazCamFrame = _hazCamFrame;
+        modular.statusFrame = _statusFrame;
+        modular.driveModeKeyboardIcon = _driveModeKeyboardIcon;
+        modular.driveModeJoystickIcon = _driveModeJoystickIcon;
+        modular.driveModeSteeringWheelIcon = _driveModeSteeringWheelIcon;
+        // Keep the default left-side radar unchanged; the imported image is
+        // retained as an optional asset for a later explicit switch.
+        modular.radarReplacement = null;
+        modular.uiFont = GetCJKFont();
+        modular.techFont = GetTechFont();
+        modular.rover = car;
+        modular.BuildForEditor();
 
         Selection.activeGameObject = canvas;
-        Debug.Log("UI 生成完毕 — SpaceX 极简 HUD + 9 项新功能");
+        Debug.Log("UI 生成完毕 — Modular Lunar Ops HUD");
     }
 
     // ══════════════════════════════════════════════════
@@ -206,7 +308,10 @@ public class UISetupWizard : EditorWindow
         var s = o.AddComponent<CanvasScaler>();
         s.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         s.referenceResolution = new Vector2(REF_WIDTH, REF_HEIGHT);
-        s.matchWidthOrHeight = 0f;
+        // The simulator is rendered at 32:9 (7680x2160). Match height so
+        // edge rails keep the compact proportions of the previous HUD instead
+        // of expanding to the full reference width on ultrawide displays.
+        s.matchWidthOrHeight = 1f;
         return o;
     }
 
@@ -219,18 +324,18 @@ public class UISetupWizard : EditorWindow
         var p = new GameObject(name, typeof(RectTransform));
         p.transform.SetParent(parent.transform, false);
 
-        // ── SpaceX: 圆角背景 (填充纹理 + Mask, 剪裁子元素) ──
+        // ── 圆角背景 (填充纹理 + Mask, 剪裁子元素) ──
         var fillTex = GenerateRoundedFillTexture(
             Mathf.RoundToInt(size.x), Mathf.RoundToInt(size.y), ROUND_RADIUS);
         var fillSprite = Sprite.Create(fillTex,
             new Rect(0, 0, fillTex.width, fillTex.height), new Vector2(0, 0));
         var bg = p.AddComponent<Image>();
         bg.sprite = fillSprite;
-        bg.color = Color.black;
+        bg.color = COL_PANEL;
         var mask = p.AddComponent<Mask>();
         mask.showMaskGraphic = true;
 
-        // ── SpaceX: 圆角边框 (RawImage 覆盖, SDF 抗锯齿) ──
+        // ── 冷青圆角边框 (RawImage 覆盖, SDF 抗锯齿) ──
         var borderTex = GenerateRoundedBorderTexture(
             Mathf.RoundToInt(size.x), Mathf.RoundToInt(size.y),
             ROUND_RADIUS, COL_BORDER, 1f);
@@ -245,14 +350,14 @@ public class UISetupWizard : EditorWindow
         borderRt.offsetMin = Vector2.zero;
         borderRt.offsetMax = Vector2.zero;
 
-        // ── SpaceX: 极淡网格 (只有在大面板显示) ──
+        // ── 极淡网格 (只有在大面板显示) ──
         if (_gridTex != null && size.x > 400 && size.y > 200)
         {
             var grid = new GameObject("GridOverlay", typeof(RectTransform));
             grid.transform.SetParent(p.transform, false);
             var gridImg = grid.AddComponent<RawImage>();
             gridImg.texture = _gridTex;
-            gridImg.color = new Color(1f, 1f, 1f, 0.04f);
+            gridImg.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.055f);
             var gridRt = grid.GetComponent<RectTransform>();
             gridRt.anchorMin = Vector2.zero; gridRt.anchorMax = Vector2.one;
             gridRt.offsetMin = Vector2.zero; gridRt.offsetMax = Vector2.zero;
@@ -263,11 +368,53 @@ public class UISetupWizard : EditorWindow
         else { rt.anchorMin = Vector2.one; rt.anchorMax = Vector2.one; rt.pivot = Vector2.one; }
         rt.anchoredPosition = pos; rt.sizeDelta = size;
 
-        // ── SpaceX: 状态指示灯 (保留功能颜色) ──
-        AddStatusLights(p, "StatusLights", new Vector2(size.x - 40, -10));
-
+        // ── 状态指示灯 (保留功能颜色) ──
         AddTitleBar(p, "TitleBar", size);
+        AddDevdogPanelChrome(p, size);
         return p;
+    }
+
+    GameObject AddDevdogSprite(GameObject parent, string name, Sprite sprite,
+        Vector2 pos, Vector2 size, Color color, bool preserveAspect = false)
+    {
+        if (sprite == null) return null;
+        var o = new GameObject(name, typeof(RectTransform));
+        o.transform.SetParent(parent.transform, false);
+        var img = o.AddComponent<Image>();
+        img.sprite = sprite;
+        img.color = color;
+        img.preserveAspect = preserveAspect;
+        img.raycastTarget = false;
+        var r = o.GetComponent<RectTransform>();
+        r.anchorMin = r.anchorMax = new Vector2(0, 1);
+        r.pivot = new Vector2(0, 1);
+        r.anchoredPosition = pos;
+        r.sizeDelta = size;
+        return o;
+    }
+
+    void AddDevdogPanelChrome(GameObject parent, Vector2 size)
+    {
+        var lineColor = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.78f);
+        var lineDim = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.40f);
+
+        // Devdog's angular bars replace the generic flat title decoration.
+        AddDevdogSprite(parent, "Devdog_TopLine", _devdogTopLineThick,
+            new Vector2(18, -7), new Vector2(Mathf.Max(120, size.x - 70), 24), lineColor);
+        AddDevdogSprite(parent, "Devdog_TopStripes", _devdogStripes,
+            new Vector2(42, -5), new Vector2(18, 18), lineColor);
+
+        if (size.y > 150)
+        {
+            AddDevdogSprite(parent, "Devdog_BottomLine", _devdogBottomLine,
+                new Vector2(18, -(size.y - 18)), new Vector2(Mathf.Min(size.x * 0.70f, 520), 26), lineDim);
+        }
+
+        if (size.x > 360 && size.y > 170)
+        {
+            AddDevdogSprite(parent, "Devdog_HexCorner", _devdogHexFrame,
+                new Vector2(size.x - 70, -12), new Vector2(48, 54), lineDim, true);
+        }
     }
 
     void AddLine(GameObject parent, string name, Vector2 pos, Vector2 size, Color color, bool topEdge)
@@ -288,7 +435,7 @@ public class UISetupWizard : EditorWindow
         var o = new GameObject("Separator_" + parent.transform.childCount, typeof(RectTransform));
         o.transform.SetParent(parent.transform, false);
         var img = o.AddComponent<Image>();
-        img.color = new Color(1f, 1f, 1f, 0.15f);
+        img.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.22f);
         var r = o.GetComponent<RectTransform>();
         r.anchorMin = r.anchorMax = new Vector2(0, 1); r.pivot = new Vector2(0, 1);
         r.anchoredPosition = pos; r.sizeDelta = new Vector2(width, 1);
@@ -299,7 +446,7 @@ public class UISetupWizard : EditorWindow
         var o = new GameObject("SeparatorR_" + parent.transform.childCount, typeof(RectTransform));
         o.transform.SetParent(parent.transform, false);
         var img = o.AddComponent<Image>();
-        img.color = new Color(1f, 1f, 1f, 0.15f);
+        img.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.22f);
         var r = o.GetComponent<RectTransform>();
         r.anchorMin = r.anchorMax = new Vector2(1, 1); r.pivot = new Vector2(1, 1);
         r.anchoredPosition = pos; r.sizeDelta = new Vector2(-width, 1);
@@ -363,7 +510,7 @@ public class UISetupWizard : EditorWindow
         rr.sizeDelta = new Vector2(-t, 0);
     }
 
-    // ── SpaceX: 测量刻度标记 ──
+    // ── 测量刻度标记 ──
     void AddMeasurementMarks(GameObject parent, string name, float x, float startY, float totalHeight, bool leftSide)
     {
         int numMarks = 5;
@@ -378,7 +525,7 @@ public class UISetupWizard : EditorWindow
             var mark = new GameObject(name + "_" + i, typeof(RectTransform));
             mark.transform.SetParent(parent.transform, false);
             var markImg = mark.AddComponent<Image>();
-            markImg.color = new Color(1f, 1f, 1f, 0.2f);
+            markImg.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.24f);
             var markR = mark.GetComponent<RectTransform>();
             markR.anchorMin = markR.anchorMax = new Vector2(0, 1);
             markR.pivot = new Vector2(0, 1);
@@ -387,7 +534,7 @@ public class UISetupWizard : EditorWindow
         }
     }
 
-    // ── React Bits 风格: 状态指示灯 ──
+    // ── 状态指示灯 ──
     void AddStatusLights(GameObject parent, string name, Vector2 pos)
     {
         float dotSize = 12f;
@@ -421,21 +568,21 @@ public class UISetupWizard : EditorWindow
 
     void AddTitleBar(GameObject parent, string name, Vector2 size)
     {
-        // ── SpaceX: 标题底部的白线 ──
+        // ── 标题底部的冷青线 ──
         float barH = 1f;
         var bar = new GameObject(name, typeof(RectTransform));
         bar.transform.SetParent(parent.transform, false);
         var barImg = bar.AddComponent<Image>();
-        barImg.color = new Color(1f, 1f, 1f, 0.2f);
+        barImg.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.28f);
         var barR = bar.GetComponent<RectTransform>();
         barR.anchorMin = new Vector2(0, 1); barR.anchorMax = new Vector2(1, 1);
         barR.pivot = new Vector2(0, 1); barR.anchoredPosition = new Vector2(0, -1);
         barR.sizeDelta = new Vector2(0, -barH);
 
-        // ── SpaceX: 小白点 ──
+        // ── 运行状态点 ──
         float dotSize = 5f;
         float[] dotPositions = { 12f, 24f, 36f };
-        Color[] dotColors = { COL_ACCENT, COL_ACCENT_DIM, new Color(0.4f, 0.4f, 0.4f, 0.4f) };
+        Color[] dotColors = { COL_ACCENT, COL_WARN, new Color(0.2f, 0.38f, 0.42f, 0.65f) };
         for (int i = 0; i < dotPositions.Length; i++)
         {
             var dot = new GameObject(name + "_Dot" + i, typeof(RectTransform));
@@ -451,7 +598,7 @@ public class UISetupWizard : EditorWindow
     }
 
     // ══════════════════════════════════════════════════
-    //  SpaceX 圆角边框纹理生成 (SDF 抗锯齿)
+    //  圆角边框纹理生成 (SDF 抗锯齿)
     // ══════════════════════════════════════════════════
 
     static Texture2D GenerateRoundedBorderTexture(int w, int h, int radius, Color color, float borderWidth)
@@ -561,15 +708,15 @@ public class UISetupWizard : EditorWindow
         var p = new GameObject(name, typeof(RectTransform));
         p.transform.SetParent(parent.transform, false);
 
-        // ── SpaceX: 纯黑背景 ──
+        // ── 子面板背景 ──
         var bg = p.AddComponent<Image>();
-        bg.color = Color.black;
+        bg.color = COL_SUBPANEL;
 
-        // ── SpaceX: 细边框 ──
+        // ── 子面板细边框 ──
         var border = new GameObject(name + "_Border", typeof(RectTransform));
         border.transform.SetParent(p.transform, false);
         var bImg = border.AddComponent<Image>();
-        bImg.color = new Color(1f, 1f, 1f, 0.25f);
+        bImg.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.28f);
         var bR = border.GetComponent<RectTransform>();
         bR.anchorMin = Vector2.zero; bR.anchorMax = Vector2.one;
         bR.offsetMin = Vector2.zero; bR.offsetMax = Vector2.zero;
@@ -586,7 +733,7 @@ public class UISetupWizard : EditorWindow
         var bg = new GameObject(name + "_BG", typeof(RectTransform));
         bg.transform.SetParent(parent.transform, false);
         var bgImg = bg.AddComponent<Image>();
-        bgImg.color = new Color(0.08f, 0.08f, 0.08f, 0.9f);
+        bgImg.color = new Color(0.02f, 0.10f, 0.12f, 0.95f);
         var bgR = bg.GetComponent<RectTransform>();
         bgR.anchorMin = bgR.anchorMax = new Vector2(0, 1); bgR.pivot = new Vector2(0, 1);
         bgR.anchoredPosition = pos; bgR.sizeDelta = size;
@@ -638,9 +785,9 @@ public class UISetupWizard : EditorWindow
         var o = new GameObject(name, typeof(RectTransform));
         o.transform.SetParent(parent.transform, false);
         var t = o.AddComponent<Text>();
-        t.text = text; t.fontSize = Mathf.RoundToInt(fontSize * 0.8f); t.color = color;
+        t.text = text; t.fontSize = Mathf.RoundToInt(fontSize * 0.9f); t.color = color;
         t.alignment = align;
-        t.font = GetCJKFont();
+        t.font = GetTextFont(text);
         var r = o.GetComponent<RectTransform>();
         r.anchorMin = r.anchorMax = new Vector2(0, 1); r.pivot = new Vector2(0, 1);
         r.anchoredPosition = pos; r.sizeDelta = size;
@@ -648,14 +795,14 @@ public class UISetupWizard : EditorWindow
     }
 
     Text AddTextRight(GameObject parent, string name, Vector2 pos, Vector2 size,
-        string text, float fontSize, Color color, TextAnchor align = TextAnchor.MiddleRight)
+        string text, float fontSize, Color color, TextAnchor align = TextAnchor.MiddleLeft)
     {
         var o = new GameObject(name, typeof(RectTransform));
         o.transform.SetParent(parent.transform, false);
         var t = o.AddComponent<Text>();
-        t.text = text; t.fontSize = Mathf.RoundToInt(fontSize * 0.8f); t.color = color;
+        t.text = text; t.fontSize = Mathf.RoundToInt(fontSize * 0.9f); t.color = color;
         t.alignment = align;
-        t.font = GetCJKFont();
+        t.font = GetTextFont(text);
         var r = o.GetComponent<RectTransform>();
         r.anchorMin = r.anchorMax = new Vector2(1, 1); r.pivot = new Vector2(1, 1);
         r.anchoredPosition = pos; r.sizeDelta = size;
@@ -664,55 +811,66 @@ public class UISetupWizard : EditorWindow
 
     Button AddKenneyButton(GameObject parent, string name, Vector2 pos, Vector2 size, string text, Sprite sprite = null)
     {
+        var sciFiPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+            DEV_DOG_ROOT + "Prefabs/UIControls/Button_Secondary_Large_DarkBG_PFB.prefab");
+        if (sciFiPrefab != null)
+        {
+            var prefabObject = (GameObject)PrefabUtility.InstantiatePrefab(sciFiPrefab);
+            prefabObject.name = name;
+            prefabObject.transform.SetParent(parent.transform, false);
+
+            var prefabRt = prefabObject.GetComponent<RectTransform>();
+            prefabRt.anchorMin = prefabRt.anchorMax = new Vector2(0, 1);
+            prefabRt.pivot = new Vector2(0, 1);
+            prefabRt.anchoredPosition = pos;
+            prefabRt.sizeDelta = size;
+
+            var prefabButton = prefabObject.GetComponent<Button>() ?? prefabObject.GetComponentInChildren<Button>(true);
+            var prefabImage = prefabObject.GetComponent<Image>();
+            if (prefabButton != null && prefabImage != null) prefabButton.targetGraphic = prefabImage;
+            if (prefabButton != null)
+            {
+                var colors = prefabButton.colors;
+                colors.fadeDuration = 0.12f;
+                prefabButton.colors = colors;
+            }
+
+            var prefabLabel = prefabObject.GetComponentsInChildren<Text>(true).FirstOrDefault();
+            if (prefabLabel != null)
+            {
+                prefabLabel.text = text;
+                prefabLabel.font = GetTextFont(text);
+                prefabLabel.fontSize = Mathf.RoundToInt(Mathf.Clamp(size.y * 0.28f, 18f, 34f));
+                prefabLabel.color = COL_TITLE;
+                prefabLabel.alignment = TextAnchor.MiddleCenter;
+                prefabLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
+                prefabLabel.verticalOverflow = VerticalWrapMode.Truncate;
+            }
+
+            return prefabButton;
+        }
+
         var o = new GameObject(name, typeof(RectTransform));
         o.transform.SetParent(parent.transform, false);
 
-        // ═══ SpaceX: Ghost pill button (white outline, transparent fill) ═══
-        // Border: 4 thin lines around the button
-        float t = 1f;
-        var borderColor = new Color(1f, 1f, 1f, 0.5f);
-
-        var top = new GameObject(name + "_T", typeof(RectTransform));
-        top.transform.SetParent(o.transform, false);
-        top.AddComponent<Image>().color = borderColor;
-        var tr2 = top.GetComponent<RectTransform>();
-        tr2.anchorMin = new Vector2(0, 1); tr2.anchorMax = new Vector2(1, 1);
-        tr2.pivot = new Vector2(0, 1); tr2.anchoredPosition = Vector2.zero;
-        tr2.sizeDelta = new Vector2(0, -t);
-
-        var bot = new GameObject(name + "_B", typeof(RectTransform));
-        bot.transform.SetParent(o.transform, false);
-        bot.AddComponent<Image>().color = borderColor;
-        var br2 = bot.GetComponent<RectTransform>();
-        br2.anchorMin = new Vector2(0, 0); br2.anchorMax = new Vector2(1, 0);
-        br2.pivot = new Vector2(0, 0); br2.anchoredPosition = Vector2.zero;
-        br2.sizeDelta = new Vector2(0, t);
-
-        var left = new GameObject(name + "_L", typeof(RectTransform));
-        left.transform.SetParent(o.transform, false);
-        left.AddComponent<Image>().color = borderColor;
-        var lr2 = left.GetComponent<RectTransform>();
-        lr2.anchorMin = new Vector2(0, 0); lr2.anchorMax = new Vector2(0, 1);
-        lr2.pivot = new Vector2(0, 0); lr2.anchoredPosition = Vector2.zero;
-        lr2.sizeDelta = new Vector2(t, 0);
-
-        var right = new GameObject(name + "_R", typeof(RectTransform));
-        right.transform.SetParent(o.transform, false);
-        right.AddComponent<Image>().color = borderColor;
-        var rr2 = right.GetComponent<RectTransform>();
-        rr2.anchorMin = new Vector2(1, 0); rr2.anchorMax = new Vector2(1, 1);
-        rr2.pivot = new Vector2(1, 0); rr2.anchoredPosition = Vector2.zero;
-        rr2.sizeDelta = new Vector2(-t, 0);
-
-        // Invisible click target
+        // 清爽的工程型按钮：保留状态反馈，不强行套用与项目不匹配的素材包。
         var btnImg = o.AddComponent<Image>();
-        btnImg.color = new Color(1f, 1f, 1f, 0.01f);
+        btnImg.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.07f);
+        AddThickBorder(o, "Frame", size,
+            new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.55f), 1f);
 
         var btn = o.AddComponent<Button>();
         btn.targetGraphic = btnImg;
+        var fallbackColors = btn.colors;
+        fallbackColors.normalColor = Color.white;
+        fallbackColors.highlightedColor = new Color(0.80f, 0.96f, 1f, 1f);
+        fallbackColors.pressedColor = new Color(0.62f, 0.88f, 0.96f, 1f);
+        fallbackColors.selectedColor = new Color(0.72f, 0.94f, 1f, 1f);
+        fallbackColors.disabledColor = new Color(0.45f, 0.50f, 0.54f, 0.6f);
+        fallbackColors.fadeDuration = 0.12f;
+        btn.colors = fallbackColors;
 
-        // White text
-        var t2 = AddText(o, "Text", Vector2.zero, size, text, 38, new Color(1f, 1f, 1f, 0.85f), TextAnchor.MiddleCenter);
+        var t2 = AddText(o, "Text", Vector2.zero, size, text, 34, COL_TITLE, TextAnchor.MiddleCenter);
         var tt = t2.GetComponent<RectTransform>();
         tt.anchorMin = Vector2.zero; tt.anchorMax = Vector2.one;
         tt.offsetMin = tt.offsetMax = Vector2.zero;
@@ -728,7 +886,7 @@ public class UISetupWizard : EditorWindow
         var bg = new GameObject(name + "_BG", typeof(RectTransform));
         bg.transform.SetParent(parent.transform, false);
         var bgImg = bg.AddComponent<Image>();
-        bgImg.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+        bgImg.color = new Color(0.02f, 0.10f, 0.12f, 0.95f);
         var bgR = bg.GetComponent<RectTransform>();
         bgR.anchorMin = bgR.anchorMax = new Vector2(0, 1); bgR.pivot = new Vector2(0, 1);
         bgR.anchoredPosition = pos; bgR.sizeDelta = size;
@@ -773,7 +931,7 @@ public class UISetupWizard : EditorWindow
     void GenerateModePanel(GameObject canvas, GameObject car)
     {
         var p = CreateSciFiPanel(canvas, "ModePanel", MODE_PANEL_POS, MODE_PANEL_SIZE, true);
-        AddText(p, "Label", new Vector2(37, -44), new Vector2(150, 68), "⚙ 驾驶模式", 48, COL_TITLE);
+        AddText(p, "Label", new Vector2(37, -44), new Vector2(150, 68), "驾驶模式", 48, COL_TITLE);
         var btnM = AddKenneyButton(p, "BtnManual", new Vector2(200, -44), new Vector2(126, 110), "手动+AEB");
         var btnA = AddKenneyButton(p, "BtnLocalAI", new Vector2(336, -44), new Vector2(126, 110), "局部AI");
         var btnH = AddKenneyButton(p, "BtnHybridAI", new Vector2(472, -44), new Vector2(126, 110), "混合AI");
@@ -787,12 +945,12 @@ public class UISetupWizard : EditorWindow
     void GenerateStatusPanel(GameObject canvas, GameObject car)
     {
         var p = CreateSciFiPanel(canvas, "StatusPanel", STATUS_PANEL_POS, STATUS_PANEL_SIZE, true);
-        AddText(p, "Title", new Vector2(30, -36), new Vector2(580, 56), "■ 月球车状态", 40, COL_TITLE);
+        AddText(p, "Title", new Vector2(30, -36), new Vector2(580, 56), "月球车状态", 40, COL_TITLE);
         AddSeparator(p, new Vector2(30, -76), 580);
         var sp = AddText(p, "Speed", new Vector2(20, -124), new Vector2(295, 72), " 车速: 0.0 km/h", 56, COL_VALUE);
         var dp = AddText(p, "Distance", new Vector2(325, -124), new Vector2(295, 72), " 里程: 0.0 m", 56, COL_VALUE);
-        var fp = AddText(p, "Fv", new Vector2(20, -204), new Vector2(295, 56), "〰 颠簸(Fv): 0.00", 44, COL_VALUE);
-        var st = AddText(p, "Steer", new Vector2(325, -204), new Vector2(295, 56), "↺ 转向: 0°", 44, COL_VALUE);
+        var fp = AddText(p, "Fv", new Vector2(20, -204), new Vector2(295, 56), "颠簸 Fv: 0.00", 44, COL_VALUE);
+        var st = AddText(p, "Steer", new Vector2(325, -204), new Vector2(295, 56), "转向: 0°", 44, COL_VALUE);
         var io = new GameObject("Move_info"); io.transform.SetParent(canvas.transform, false);
         var info = io.AddComponent<Move_info>();
         info.speedText = sp; info.distanceText = dp; info.fvText = fp; info.steerText = st;
@@ -803,7 +961,7 @@ public class UISetupWizard : EditorWindow
     void GenerateTelemetryPanel(GameObject canvas, GameObject car)
     {
         var p = CreateSciFiPanel(canvas, "TelemetryPanel", TELEMETRY_PANEL_POS, TELEMETRY_PANEL_SIZE, true);
-        AddText(p, "Title", new Vector2(30, -36), new Vector2(580, 56), "■ 姿态 & 悬挂 & 滑转", 40, COL_TITLE);
+        AddText(p, "Title", new Vector2(30, -36), new Vector2(580, 56), "姿态 / 悬挂 / 滑转", 40, COL_TITLE);
         AddSeparator(p, new Vector2(30, -76), 580);
 
         // ── 迷你姿态指示器 (替换旧人工地平线) ──
@@ -853,11 +1011,11 @@ public class UISetupWizard : EditorWindow
             var sbg = new GameObject("SlipBG" + i, typeof(RectTransform));
             sbg.transform.SetParent(slipPanel.transform, false);
             var sbgI = sbg.AddComponent<Image>();
-            sbgI.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+            sbgI.color = new Color(0.02f, 0.10f, 0.12f, 0.9f);
             var sbgR = sbg.GetComponent<RectTransform>();
             sbgR.anchorMin = sbgR.anchorMax = new Vector2(0.5f, 0.5f);
             sbgR.pivot = new Vector2(0.5f, 0);
-            sbgR.anchoredPosition = new Vector2(slipOffsets[i], -60);
+            sbgR.anchoredPosition = new Vector2(slipOffsets[i], slipBarY);
             sbgR.sizeDelta = new Vector2(slipBarW, slipBarH);
 
             // 填充条
@@ -872,7 +1030,7 @@ public class UISetupWizard : EditorWindow
             var barR = bar.GetComponent<RectTransform>();
             barR.anchorMin = barR.anchorMax = new Vector2(0.5f, 0.5f);
             barR.pivot = new Vector2(0.5f, 0);
-            barR.anchoredPosition = new Vector2(slipOffsets[i], -60);
+            barR.anchoredPosition = new Vector2(slipOffsets[i], slipBarY);
             barR.sizeDelta = new Vector2(slipBarW - 2, slipBarH - 2);
             slipBars[i] = barI;
 
@@ -909,18 +1067,18 @@ public class UISetupWizard : EditorWindow
     void GenerateSystemStatusPanel(GameObject canvas, GameObject car)
     {
         var p = CreateSciFiPanel(canvas, "SystemStatusPanel", SYSSTATUS_PANEL_POS, SYSSTATUS_PANEL_SIZE, false);
-        AddTextRight(p, "Title", new Vector2(-37, -36), new Vector2(500, 48), "■ 外设状态", 36, COL_TITLE);
-        AddSeparatorRight(p, new Vector2(-37, -72), 500);
-        var g29 = AddTextRight(p, "G29", new Vector2(-21, -120), new Vector2(535, 48), "● G29: 未连接 (键盘)", 36, COL_WARN);
-        var plat = AddTextRight(p, "Platform", new Vector2(-21, -176), new Vector2(535, 48), "● 动感平台: 未连接", 36, COL_WARN);
-        var pp = AddTextRight(p, "PPitch", new Vector2(-21, -232), new Vector2(260, 44), "平台俯仰: 0.0°", 30, COL_TEXT_DIM);
-        var pr = AddTextRight(p, "PRoll", new Vector2(-290, -232), new Vector2(260, 44), "平台侧倾: 0.0°", 30, COL_TEXT_DIM);
-        var fps = AddTextRight(p, "MotionFPS", new Vector2(-21, -284), new Vector2(535, 44), "底座 50Hz: —", 30, COL_TEXT_DIM);
+        AddTextRight(p, "Title", new Vector2(-37, -36), new Vector2(680, 48), "外设状态", 36, COL_TITLE);
+        AddSeparatorRight(p, new Vector2(-37, -72), 680);
+        var g29 = AddTextRight(p, "G29", new Vector2(-37, -112), new Vector2(680, 42), "方向盘: 未启用", 32, COL_TEXT_DIM);
+        var plat = AddTextRight(p, "Platform", new Vector2(-37, -162), new Vector2(680, 42), "动感平台: 未连接", 32, COL_WARN);
+        var pp = AddTextRight(p, "PPitch", new Vector2(-37, -214), new Vector2(330, 40), "平台俯仰: 0.0°", 28, COL_TEXT_DIM);
+        var pr = AddTextRight(p, "PRoll", new Vector2(-387, -214), new Vector2(330, 40), "平台侧倾: 0.0°", 28, COL_TEXT_DIM);
+        var fps = AddTextRight(p, "MotionFPS", new Vector2(-37, -264), new Vector2(680, 40), "底座 50Hz: —", 28, COL_TEXT_DIM);
 
         // ── 通信链路 ──
-        AddSeparatorRight(p, new Vector2(-37, -330), 500);
-        var comms = AddTextRight(p, "CommsText", new Vector2(-21, -352), new Vector2(535, 40),
-            "📡 [█████]  20ms  10.0 Mbps", 30, COL_VALUE);
+        AddSeparatorRight(p, new Vector2(-37, -286), 680);
+        var comms = AddTextRight(p, "CommsText", new Vector2(-37, -300), new Vector2(680, 36),
+            "LINK   [█████]   20ms   10.0 Mbps", 26, COL_VALUE);
 
         // ── 绑定 ──
         var manual = FindObjectOfType<ManualDriverWithAEB>();
@@ -935,11 +1093,21 @@ public class UISetupWizard : EditorWindow
     void GenerateMapPanel(GameObject canvas, GameObject car)
     {
         var p = CreateSciFiPanel(canvas, "MapPanel", MAP_PANEL_POS, MAP_PANEL_SIZE, false);
-        AddTextRight(p, "Title", new Vector2(-37, -36), new Vector2(500, 56), "■ 探索地图 / 导航", 36, COL_TITLE);
-        AddSeparatorRight(p, new Vector2(-37, -72), 500);
+        AddTextRight(p, "Title", new Vector2(-37, -36), new Vector2(680, 56), "探索地图 / 导航", 36, COL_TITLE);
+        AddSeparatorRight(p, new Vector2(-37, -72), 680);
 
         // ── 地图 (缩小高度以容纳下方导航信息) ──
-        var mi = AddRawImage(p, "MapImage", new Vector2(0, -48), new Vector2(540, 400));
+        var mapBackdrop = new GameObject("MapBackdrop", typeof(RectTransform));
+        mapBackdrop.transform.SetParent(p.transform, false);
+        mapBackdrop.AddComponent<Image>().color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.07f);
+        var mapBackdropRt = mapBackdrop.GetComponent<RectTransform>();
+        mapBackdropRt.anchorMin = mapBackdropRt.anchorMax = new Vector2(0.5f, 0.5f);
+        mapBackdropRt.pivot = new Vector2(0.5f, 0.5f);
+        mapBackdropRt.anchoredPosition = new Vector2(0, -44);
+        mapBackdropRt.sizeDelta = new Vector2(700, 330);
+
+        var mi = AddRawImage(p, "MapImage", new Vector2(0, -44), new Vector2(700, 330));
+        mi.color = new Color(0.72f, 0.96f, 0.98f, 0.82f);
         var mir = mi.GetComponent<RectTransform>();
         mir.anchorMin = new Vector2(0.5f, 0.5f); mir.anchorMax = new Vector2(0.5f, 0.5f);
         mir.pivot = new Vector2(0.5f, 0.5f);
@@ -952,14 +1120,14 @@ public class UISetupWizard : EditorWindow
         ar.sizeDelta = new Vector2(10, 10);
 
         // ── GPS / 航点信息栏 (地图下方) ──
-        var infoPanel = CreateSubPanel(p, "NavInfoPanel", new Vector2(-272, -472), new Vector2(540, 96));
-        var gpsT = AddText(infoPanel, "GPSText", new Vector2(7, -12), new Vector2(270, 32),
+        var infoPanel = CreateSubPanel(p, "NavInfoPanel", new Vector2(-360, -405), new Vector2(700, 82));
+        var gpsT = AddText(infoPanel, "GPSText", new Vector2(12, -10), new Vector2(350, 30),
             "GPS 12颗  25.00000°N  121.00000°E", 24, COL_VALUE, TextAnchor.MiddleLeft);
-        var wpT = AddText(infoPanel, "WaypointText", new Vector2(277, -12), new Vector2(260, 32),
+        var wpT = AddText(infoPanel, "WaypointText", new Vector2(370, -10), new Vector2(310, 30),
             "航点:  —", 24, COL_VALUE, TextAnchor.MiddleLeft);
-        var gpsDetail = AddText(infoPanel, "GPSDetail", new Vector2(7, -55), new Vector2(270, 28),
+        var gpsDetail = AddText(infoPanel, "GPSDetail", new Vector2(12, -50), new Vector2(350, 24),
             "定位精度 ±0.5m  高程 0m", 18, COL_TEXT_DIM, TextAnchor.MiddleLeft);
-        var wpDetail = AddText(infoPanel, "WaypointDetail", new Vector2(277, -55), new Vector2(260, 28),
+        var wpDetail = AddText(infoPanel, "WaypointDetail", new Vector2(370, -50), new Vector2(310, 24),
             "目标方向: —", 18, COL_TEXT_DIM, TextAnchor.MiddleLeft);
 
         // ── 绑定 ──
@@ -975,48 +1143,49 @@ public class UISetupWizard : EditorWindow
     void GenerateCameraPanel(GameObject canvas, GameObject car)
     {
         var p = CreateSciFiPanel(canvas, "CamPanel", CAM_PANEL_POS, CAM_PANEL_SIZE, false);
-        AddTextRight(p, "Title", new Vector2(-37, -36), new Vector2(500, 56), "■ 底盘避障 (HazCam)", 36, COL_TITLE);
-        AddSeparatorRight(p, new Vector2(-37, -72), 500);
+        AddTextRight(p, "Title", new Vector2(-37, -36), new Vector2(680, 56), "底盘避障 / HazCam", 36, COL_TITLE);
+        AddSeparatorRight(p, new Vector2(-37, -72), 680);
 
-        // ── SpaceX: 摄像头装饰框 (填满面板) ──
+        // ── 摄像头装饰框 (填满面板) ──
         var camFrame = new GameObject("CamFrame", typeof(RectTransform));
         camFrame.transform.SetParent(p.transform, false);
         var frameImg = camFrame.AddComponent<Image>();
-        frameImg.color = new Color(1f, 1f, 1f, 0.05f);
+        frameImg.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.06f);
         var frameR = camFrame.GetComponent<RectTransform>();
         frameR.anchorMin = new Vector2(0.5f, 0.5f); frameR.anchorMax = new Vector2(0.5f, 0.5f);
         frameR.pivot = new Vector2(0.5f, 0.5f);
         frameR.anchoredPosition = new Vector2(0, -22);
-        frameR.sizeDelta = new Vector2(548, 432);
+        frameR.sizeDelta = new Vector2(710, 390);
 
-        var ci = AddRawImage(p, "CamImage", new Vector2(0, -42), new Vector2(538, 418));
+        var ci = AddRawImage(p, "CamImage", new Vector2(0, -42), new Vector2(700, 380));
+        ci.color = new Color(0.82f, 0.96f, 0.98f, 0.90f);
         var cir = ci.GetComponent<RectTransform>();
         cir.anchorMin = new Vector2(0.5f, 0.5f); cir.anchorMax = new Vector2(0.5f, 0.5f);
         cir.pivot = new Vector2(0.5f, 0.5f);
         cir.anchoredPosition = new Vector2(0, -22);
 
-        // ── SpaceX: 摄像头十字线 + 角标 ──
+        // ── 摄像头十字线 + 角标 ──
         var camCrossH = new GameObject("CamCrossH", typeof(RectTransform));
         camCrossH.transform.SetParent(p.transform, false);
-        var camChI = camCrossH.AddComponent<Image>(); camChI.color = new Color(1f, 1f, 1f, 0.15f);
+        var camChI = camCrossH.AddComponent<Image>(); camChI.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.22f);
         var camChR = camCrossH.GetComponent<RectTransform>();
         camChR.anchorMin = new Vector2(0.5f, 0.5f); camChR.anchorMax = new Vector2(0.5f, 0.5f);
         camChR.pivot = new Vector2(0.5f, 0.5f);
         camChR.anchoredPosition = new Vector2(0, -22);
-        camChR.sizeDelta = new Vector2(538, 1);
+        camChR.sizeDelta = new Vector2(700, 1);
 
         var camCrossV = new GameObject("CamCrossV", typeof(RectTransform));
         camCrossV.transform.SetParent(p.transform, false);
-        var camCvI = camCrossV.AddComponent<Image>(); camCvI.color = new Color(1f, 1f, 1f, 0.15f);
+        var camCvI = camCrossV.AddComponent<Image>(); camCvI.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.22f);
         var camCvR = camCrossV.GetComponent<RectTransform>();
         camCvR.anchorMin = new Vector2(0.5f, 0.5f); camCvR.anchorMax = new Vector2(0.5f, 0.5f);
         camCvR.pivot = new Vector2(0.5f, 0.5f);
         camCvR.anchoredPosition = new Vector2(0, -22);
-        camCvR.sizeDelta = new Vector2(2, 418);
+        camCvR.sizeDelta = new Vector2(2, 380);
 
         // 四角标记
-        float camHalf = 538f / 2f;
-        float camHeightHalf = 418f / 2f;
+        float camHalf = 700f / 2f;
+        float camHeightHalf = 380f / 2f;
         AddCameraCornerMark(p, "CamTL", -(camHalf - 30), camHeightHalf - 30, true, true);
         AddCameraCornerMark(p, "CamTR", camHalf - 30, camHeightHalf - 30, false, true);
         AddCameraCornerMark(p, "CamBL", -(camHalf - 30), -(camHeightHalf - 30), true, false);
@@ -1025,23 +1194,23 @@ public class UISetupWizard : EditorWindow
         var camBorder = new GameObject("CamBorder", typeof(RectTransform));
         camBorder.transform.SetParent(p.transform, false);
         var cbI = camBorder.AddComponent<Image>();
-        cbI.color = new Color(1f, 1f, 1f, 0.15f);
+        cbI.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.32f);
         var cbR = camBorder.GetComponent<RectTransform>();
         cbR.anchorMin = new Vector2(0.5f, 0.5f); cbR.anchorMax = new Vector2(0.5f, 0.5f);
         cbR.pivot = new Vector2(0.5f, 0.5f);
         cbR.anchoredPosition = new Vector2(0, -22);
-        cbR.sizeDelta = new Vector2(544, 426);
+        cbR.sizeDelta = new Vector2(706, 386);
 
         car.GetOrAddComponent<ChassisCamera>().camImage = ci;
     }
 
-    // ── SpaceX: 摄像头角标 ──
+    // ── 摄像头角标 ──
     void AddCameraCornerMark(GameObject parent, string name, float x, float y, bool left, bool top)
     {
         float len = 24, t = 2;
         var h = new GameObject(name + "_H", typeof(RectTransform));
         h.transform.SetParent(parent.transform, false);
-        var hI = h.AddComponent<Image>(); hI.color = new Color(1f, 1f, 1f, 0.25f);
+        var hI = h.AddComponent<Image>(); hI.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.5f);
         var hR = h.GetComponent<RectTransform>();
         hR.anchorMin = hR.anchorMax = new Vector2(0.5f, 0.5f);
         hR.pivot = new Vector2(left ? 0 : 1, top ? 1 : 0);
@@ -1050,7 +1219,7 @@ public class UISetupWizard : EditorWindow
 
         var v = new GameObject(name + "_V", typeof(RectTransform));
         v.transform.SetParent(parent.transform, false);
-        var vI = v.AddComponent<Image>(); vI.color = new Color(1f, 1f, 1f, 0.25f);
+        var vI = v.AddComponent<Image>(); vI.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.5f);
         var vR = v.GetComponent<RectTransform>();
         vR.anchorMin = vR.anchorMax = new Vector2(0.5f, 0.5f);
         vR.pivot = new Vector2(left ? 0 : 1, top ? 1 : 0);
@@ -1063,7 +1232,7 @@ public class UISetupWizard : EditorWindow
         var bar = new GameObject("CompassBar", typeof(RectTransform));
         bar.transform.SetParent(canvas.transform, false);
         var bg = bar.AddComponent<Image>();
-        bg.color = new Color(0.05f, 0.05f, 0.05f, 0.8f);
+        bg.color = new Color(0.02f, 0.08f, 0.10f, 0.92f);
 
         var rt = bar.GetComponent<RectTransform>();
         rt.anchorMin = new Vector2(0.5f, 1);
@@ -1101,7 +1270,7 @@ public class UISetupWizard : EditorWindow
             var dot = new GameObject("Cardinal_" + degLabel[i], typeof(RectTransform));
             dot.transform.SetParent(bar.transform, false);
             var dotImg = dot.AddComponent<Image>();
-            dotImg.color = new Color(1f, 1f, 1f, 0.4f);
+            dotImg.color = new Color(COL_ACCENT.r, COL_ACCENT.g, COL_ACCENT.b, 0.45f);
             var dotR = dot.GetComponent<RectTransform>();
             dotR.anchorMin = dotR.anchorMax = new Vector2(0, 0.5f);
             dotR.pivot = new Vector2(0.5f, 0.5f);
@@ -1112,7 +1281,7 @@ public class UISetupWizard : EditorWindow
                 degLabel[i], 18, new Color(1f, 1f, 1f, 0.25f), TextAnchor.MiddleCenter);
         }
 
-        // 当前航向指示器 (白色三角)
+        // 当前航向指示器
         var pointer = new GameObject("HeadingPointer", typeof(RectTransform));
         pointer.transform.SetParent(bar.transform, false);
         var ptrImg = pointer.AddComponent<Image>();
@@ -1134,13 +1303,13 @@ public class UISetupWizard : EditorWindow
     void GenerateBatteryPanel(GameObject canvas, GameObject car)
     {
         var p = CreateSciFiPanel(canvas, "BatteryPanel", BATT_PANEL_POS, BATT_PANEL_SIZE, false);
-        AddTextRight(p, "Title", new Vector2(-30, -28), new Vector2(520, 36), "■ 电源系统", 30, COL_TITLE);
-        AddSeparatorRight(p, new Vector2(-30, -54), 520);
+        AddTextRight(p, "Title", new Vector2(-37, -26), new Vector2(680, 36), "电源系统", 30, COL_TITLE);
+        AddSeparatorRight(p, new Vector2(-37, -52), 680);
 
-        var battText = AddTextRight(p, "BatteryValue", new Vector2(-30, -96), new Vector2(520, 40),
-            "⚡ 100.0%  28.8V  0.0A", 30, COL_VALUE, TextAnchor.MiddleRight);
-        var rangeText = AddTextRight(p, "RangeValue", new Vector2(-30, -136), new Vector2(520, 32),
-            "续航估计: -- km", 24, COL_TEXT_DIM, TextAnchor.MiddleRight);
+        var battText = AddTextRight(p, "BatteryValue", new Vector2(-37, -80), new Vector2(680, 36),
+            "BAT   100.0%   28.8V   0.0A", 28, COL_VALUE, TextAnchor.MiddleLeft);
+        var rangeText = AddTextRight(p, "RangeValue", new Vector2(-37, -120), new Vector2(680, 28),
+            "续航估计: -- km", 22, COL_TEXT_DIM, TextAnchor.MiddleLeft);
 
         var hud = car.GetComponent<HUDDashboard>();
         if (hud != null) hud.batteryText = battText;
@@ -1149,12 +1318,12 @@ public class UISetupWizard : EditorWindow
     void GenerateEventLogPanel(GameObject canvas, GameObject car)
     {
         var p = CreateSciFiPanel(canvas, "EventLogPanel", EVENTLOG_PANEL_POS, EVENTLOG_PANEL_SIZE, false);
-        AddTextRight(p, "Title", new Vector2(-30, -28), new Vector2(520, 36), "■ 事件日志", 30, COL_TITLE);
-        AddSeparatorRight(p, new Vector2(-30, -54), 520);
+        AddTextRight(p, "Title", new Vector2(-37, -26), new Vector2(680, 36), "事件日志", 30, COL_TITLE);
+        AddSeparatorRight(p, new Vector2(-37, -52), 680);
 
-        var logText = AddTextRight(p, "LogContent", new Vector2(-30, -170), new Vector2(540, 120),
-            "系统启动", 20, COL_TEXT_DIM, TextAnchor.MiddleRight);
-        logText.alignment = TextAnchor.LowerRight;
+        var logText = AddTextRight(p, "LogContent", new Vector2(-37, -72), new Vector2(680, 84),
+            "系统启动", 20, COL_TEXT_DIM, TextAnchor.MiddleLeft);
+        logText.alignment = TextAnchor.LowerLeft;
 
         var hud = car.GetComponent<HUDDashboard>();
         if (hud != null) hud.eventLogText = logText;
@@ -1170,7 +1339,7 @@ public class UISetupWizard : EditorWindow
         ar.anchorMin = Vector2.zero; ar.anchorMax = Vector2.one;
         ar.offsetMin = ar.offsetMax = Vector2.zero;
 
-        // ── React Bits 风格: 多层警告边框 ──
+        // ── 多层警告边框 ──
         var outerWarn = new GameObject("OuterWarnBorder", typeof(RectTransform));
         outerWarn.transform.SetParent(a.transform, false);
         var owI = outerWarn.AddComponent<Image>();
@@ -1205,14 +1374,14 @@ public class UISetupWizard : EditorWindow
         ibR.anchorMin = Vector2.zero; ibR.anchorMax = Vector2.one;
         ibR.offsetMin = new Vector2(60, 60); ibR.offsetMax = new Vector2(-60, -60);
 
-        // ── React Bits 风格: 警告面板四角能量点 ──
+        // ── 警告面板四角能量点 ──
         AddWarningEnergyDots(a, "WarnEnergyDots");
 
         var manual = car.GetOrAddComponent<ManualDriverWithAEB>();
         manual.aebAlertText = at; manual.aebOverlayImage = ov;
     }
 
-    // ── React Bits 风格: 警告能量点 ──
+    // ── 警告能量点 ──
     void AddWarningEnergyDots(GameObject parent, string name)
     {
         float dotSize = 24f;

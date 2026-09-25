@@ -80,6 +80,7 @@ namespace MoonRover.FeedBack
             if (mapImage != null)
             {
                 mapImage.texture = mapTexture;
+                mapImage.color = Color.white;
                 Debug.Log($"[ExplorationMap] ({gameObject.name}) 地图已初始化。地形: {targetTerrain.name}");
             }
             else

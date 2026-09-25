@@ -33,6 +33,18 @@ namespace MoonRover.Platform
         [SerializeField] private float maxPitchAngle = 3f;
         [SerializeField] private bool sendYaw = false;
 
+        [Header("Six DOF cueing (safe limited mapping)")]
+        [SerializeField] private bool enableSixDofCueing = true;
+        [SerializeField] private float maxYawCueAngle = 8f;
+        [SerializeField] private float maxTurnRollCueAngle = 1.5f;
+        [SerializeField] private float maxSurgeCue = 20f;
+        [SerializeField] private float maxSwayCue = 12f;
+        [SerializeField] private float maxHeaveCue = 10f;
+        [SerializeField] private float longitudinalAccelerationForFullCue = 2f;
+        [SerializeField] private float lateralAccelerationForFullCue = 2f;
+        [SerializeField] private float verticalAccelerationForFullCue = 2f;
+        [SerializeField] private float cueFilterSharpness = 10f;
+
         [Header("延迟预测补偿")]
         [SerializeField] private bool enablePrediction = true;
         [Tooltip("向前预测时间。建议从 0.05~0.08 秒开始，最大不超过 0.15 秒。")]
@@ -87,6 +99,13 @@ namespace MoonRover.Platform
         private Vector3 filteredLocalAngularVelocity;
         private float filteredTerrainPitchLead;
         private float filteredTerrainRollLead;
+        private Vector3 previousLocalVelocity;
+        private bool hasPreviousLocalVelocity;
+        private float filteredYawCue;
+        private float filteredTurnRollCue;
+        private float filteredSurgeCue;
+        private float filteredSwayCue;
+        private float filteredHeaveCue;
 
         // 轴映射系数 (可根据实际底座调整)
         private const float pitchScale = 1f;
@@ -153,6 +172,12 @@ namespace MoonRover.Platform
             {
                 sendTimer = 0f;
                 filteredLocalAngularVelocity = Vector3.zero;
+                hasPreviousLocalVelocity = false;
+                filteredYawCue = 0f;
+                filteredTurnRollCue = 0f;
+                filteredSurgeCue = 0f;
+                filteredSwayCue = 0f;
+                filteredHeaveCue = 0f;
                 return;
             }
 
@@ -310,6 +335,50 @@ namespace MoonRover.Platform
 
             // 平移量 (通常月球车不需要，设为0)
             float x = 0f, y = 0f, z = 0f;
+
+            // Safe six-DOF cueing: steering drives yaw/roll, acceleration drives translation.
+            // All translation values are small offsets in the SDK's millimeter coordinates.
+            if (enableSixDofCueing && carController != null && carController.CarRigidbody != null)
+            {
+                Rigidbody body = carController.CarRigidbody;
+                Vector3 localVelocity = roverTransform.InverseTransformDirection(body.velocity);
+                Vector3 localAcceleration = Vector3.zero;
+                if (hasPreviousLocalVelocity)
+                {
+                    localAcceleration = (localVelocity - previousLocalVelocity) /
+                        Mathf.Max(Time.fixedDeltaTime, 0.001f);
+                }
+                previousLocalVelocity = localVelocity;
+                hasPreviousLocalVelocity = true;
+
+                float filterFactor = 1f - Mathf.Exp(-cueFilterSharpness * Time.fixedDeltaTime);
+                float steer = Mathf.Clamp(carController.CurrentSteerAngle / 25f, -1f, 1f);
+                float yawCue = steer * maxYawCueAngle;
+                float turnRollCue = -Mathf.Clamp(
+                    localAcceleration.x / Mathf.Max(lateralAccelerationForFullCue, 0.01f), -1f, 1f)
+                    * maxTurnRollCueAngle;
+                float surgeCue = -Mathf.Clamp(
+                    localAcceleration.z / Mathf.Max(longitudinalAccelerationForFullCue, 0.01f), -1f, 1f)
+                    * maxSurgeCue;
+                float swayCue = -Mathf.Clamp(
+                    localAcceleration.x / Mathf.Max(lateralAccelerationForFullCue, 0.01f), -1f, 1f)
+                    * maxSwayCue;
+                float heaveCue = -Mathf.Clamp(
+                    localAcceleration.y / Mathf.Max(verticalAccelerationForFullCue, 0.01f), -1f, 1f)
+                    * maxHeaveCue;
+
+                filteredYawCue = Mathf.Lerp(filteredYawCue, yawCue, filterFactor);
+                filteredTurnRollCue = Mathf.Lerp(filteredTurnRollCue, turnRollCue, filterFactor);
+                filteredSurgeCue = Mathf.Lerp(filteredSurgeCue, surgeCue, filterFactor);
+                filteredSwayCue = Mathf.Lerp(filteredSwayCue, swayCue, filterFactor);
+                filteredHeaveCue = Mathf.Lerp(filteredHeaveCue, heaveCue, filterFactor);
+
+                rx = Mathf.Clamp(roll * rollScale + filteredTurnRollCue, -maxRollAngle, maxRollAngle);
+                rz = sendYaw ? Mathf.Clamp(filteredYawCue, -maxYawCueAngle, maxYawCueAngle) : 0f;
+                x = filteredSurgeCue;
+                y = filteredSwayCue;
+                z = filteredHeaveCue;
+            }
 
             // 构建指令
             string command = string.Format(CultureInfo.InvariantCulture,

@@ -19,17 +19,57 @@ namespace MoonRover.Driver
 
         [Header("输入滤波")]
         [Tooltip("油门/刹车死区，低于此值归零")]
-        public float inputDeadzone = 0.05f;
+        [Range(0f, 0.4f)]
+        public float inputDeadzone = 0.15f;
+        [Tooltip("手柄转向死区。方向盘不使用这个较大的手柄死区。")]
+        [Range(0f, 0.2f)]
+        public float steeringInputDeadzone = 0.05f;
+        [Tooltip("油门响应曲线指数：大于 1 时轻推更柔和，满油门仍接近 100%。")]
+        [Range(1f, 3f)]
+        public float throttleResponseExponent = 1.6f;
         [Tooltip("油门释放平滑速度（越大越快跟上）")]
         public float releaseSmoothing = 5f;
 
         [Header("通用手柄")]
         [Tooltip("未连接 G29 时，使用 Unity 的通用手柄轴控制月球车。")]
         public bool useGenericGamepad = true;
-        [Tooltip("通用手柄刹车按钮，默认按钮 0。")]
-        public int gamepadBrakeButton = 0;
-        [Tooltip("通用手柄手刹按钮，默认按钮 1。")]
-        public int gamepadHandbrakeButton = 1;
+        [Tooltip("通用手柄刹车按钮，实际读取 Unity 按钮 2，面板显示为按钮 3。")]
+        public int gamepadBrakeButton = 2;
+        [Tooltip("通用手柄手刹按钮，实际读取 Unity 按钮 3，面板显示为按钮 4。")]
+        public int gamepadHandbrakeButton = 3;
+        [Tooltip("通用手柄当前为 Unity 设备 1；与设备 4 的底座按钮盒分开读取。")]
+        public int genericGamepadJoystickNumber = 1;
+        [Tooltip("Reverse engagement speed threshold in meters per second")]
+        public float reverseEngageSpeed = 0.15f;
+
+        [Header("手柄静止保护")]
+        [Tooltip("启动或切换到手柄模式后，自动记录当前摇杆中心，修正 USB 手柄的中心偏差。")]
+        public bool autoCalibrateGamepadCenter = true;
+        [Tooltip("手柄中心校准时长（秒）。校准期间请不要推动摇杆。")]
+        public float gamepadCenterCalibrationSeconds = 0.6f;
+        [Tooltip("没有任何输入时保持刹车，避免底盘在坡面上自行向后滑。")]
+        public bool holdBrakeWhenNeutral = true;
+        [Tooltip("切换到方向盘模式时，方向盘回到中位后才重新接收转向输入。")]
+        [Range(0.03f, 0.2f)]
+        public float steeringWheelCenterDeadzone = 0.1f;
+
+        public enum DriveInputMode
+        {
+            SteeringWheel = 0,
+            Joystick = 1
+        }
+
+        [Header("驾驶模式切换")]
+        [Tooltip("底座控制器检测顺序第 1 个按钮：在方向盘驾驶和手柄驾驶之间切换。")]
+        public DriveInputMode driveMode = DriveInputMode.SteeringWheel;
+        [Tooltip("检测顺序第 1 个按钮对应 Unity 按钮 0。")]
+        public int modeToggleButton = 0;
+        [Tooltip("底座控制器的 Unity 摇杆编号。当前设备顺序中 Generic USB Joystick 是第 4 个。")]
+        public int baseControllerJoystickNumber = 4;
+        [Tooltip("是否启用底座控制器按钮切换驾驶模式。")]
+        public bool toggleModeFromBaseController = true;
+        [Tooltip("底座灯光按钮：与检测程序显示的 11 号按钮对应 Unity 索引 10。")]
+        public int headlightToggleButton = 10;
 
         [Header("UI 引用 (由 UISetupWizard 绑定)")]
         public Text aebAlertText;
@@ -45,6 +85,15 @@ namespace MoonRover.Driver
         private string aebReason = "";
         private float m_SmoothedAccel = 0f;
         private float m_SmoothedBrake = 0f;
+        private bool modeToggleButtonWasPressed = false;
+        private bool headlightToggleButtonWasPressed = false;
+        private float gamepadCenterHorizontal = 0f;
+        private float gamepadCenterVertical = 0f;
+        private float gamepadCalibrationTime = 0f;
+        private Vector2 gamepadCalibrationSum = Vector2.zero;
+        private int gamepadCalibrationSamples = 0;
+        private bool gamepadCenterCalibrated = false;
+        private bool steeringWheelNeedsCentering = false;
 
         void Awake()
         {
@@ -62,6 +111,13 @@ namespace MoonRover.Driver
             {
                 logitechDriver = GetComponent<LogitechDriver>();
             }
+
+        }
+
+        void Start()
+        {
+            ResetGamepadCenterCalibration();
+            UpdateG29Status();
         }
 
         public float GetSteeringInput()
@@ -79,37 +135,142 @@ namespace MoonRover.Driver
             }
         }
 
+        void Update()
+        {
+            // 方向盘状态刷新不依赖底座按钮控制器是否存在。
+            if (driveMode == DriveInputMode.SteeringWheel &&
+                useLogitechSteeringWheel && logitechDriver != null)
+            {
+                logitechDriver.UpdateState();
+            }
+
+            bool hasBaseController = useGenericGamepad && HasGamepad();
+            if (!hasBaseController)
+            {
+                modeToggleButtonWasPressed = false;
+                headlightToggleButtonWasPressed = false;
+                return;
+            }
+
+            if (driveMode == DriveInputMode.Joystick)
+                UpdateGamepadCenterCalibration(Time.deltaTime);
+
+            if (!toggleModeFromBaseController)
+            {
+                modeToggleButtonWasPressed = false;
+            }
+
+            bool pressed = IsJoystickButtonPressed(modeToggleButton, baseControllerJoystickNumber);
+            if (toggleModeFromBaseController && pressed && !modeToggleButtonWasPressed)
+            {
+                driveMode = driveMode == DriveInputMode.SteeringWheel
+                    ? DriveInputMode.Joystick
+                    : DriveInputMode.SteeringWheel;
+
+                // 切换瞬间清掉滤波残留，避免上一种模式的油门/刹车继续保持。
+                m_SmoothedAccel = 0f;
+                m_SmoothedBrake = 0f;
+                ResetGamepadCenterCalibration();
+                steeringWheelNeedsCentering = driveMode == DriveInputMode.SteeringWheel;
+
+                Debug.Log("[ManualDriverWithAEB] 驾驶模式切换为: " + GetDriveModeLabel());
+                UpdateG29Status();
+            }
+
+            // 边沿触发：按住按钮只切换一次，松开后才能再次切换。
+            modeToggleButtonWasPressed = pressed;
+
+            // 灯光切换直接复用驾驶模式按钮的底座设备和 Input.GetKey 读取方式。
+            bool headlightPressed = IsJoystickButtonPressed(
+                headlightToggleButton, baseControllerJoystickNumber);
+            if (headlightPressed && !headlightToggleButtonWasPressed && m_Car != null)
+            {
+                m_Car.ToggleHeadlights();
+                Debug.Log("[ManualDriverWithAEB] 收到底座灯光按钮11，Unity索引=" +
+                    headlightToggleButton);
+            }
+            headlightToggleButtonWasPressed = headlightPressed;
+        }
+
         void FixedUpdate()
         {
             float h, v, footbrake = 0f, handbrake = 0f;
 
-            if (useLogitechSteeringWheel && logitechDriver != null && logitechDriver.IsConnected())
+            if (driveMode == DriveInputMode.SteeringWheel)
             {
-                logitechDriver.UpdateState();
-                h = logitechDriver.GetSteeringInput();
-                v = ApplyDeadzone(logitechDriver.GetAccelInput());
-                footbrake = ApplyDeadzone(logitechDriver.GetBrakeInput());
-                handbrake = logitechDriver.IsButtonPressed(0) ? 1f : 0f;
+                // 方向盘模式：方向盘、油门、刹车均来自 LogitechDriver。
+                h = useLogitechSteeringWheel && logitechDriver != null
+                    ? ApplyDeadzone(logitechDriver.GetSteeringInput(), steeringInputDeadzone)
+                    : 0f;
+                v = useLogitechSteeringWheel && logitechDriver != null
+                    ? logitechDriver.GetAccelInput()
+                    : 0f;
+                footbrake = useLogitechSteeringWheel && logitechDriver != null
+                    ? logitechDriver.GetBrakeInput()
+                    : 0f;
+
+                if (steeringWheelNeedsCentering)
+                {
+                    // 方向盘回中之前，车辆保持直行并刹车，不接受残留转角/踏板输入。
+                    bool wheelIsCentered = !useLogitechSteeringWheel || logitechDriver == null ||
+                        !logitechDriver.IsConnected() ||
+                        Mathf.Abs(logitechDriver.GetSteeringInput()) <= steeringWheelCenterDeadzone;
+                    h = 0f;
+                    v = 0f;
+                    footbrake = 1f;
+                    if (wheelIsCentered)
+                    {
+                        steeringWheelNeedsCentering = false;
+                        Debug.Log("[ManualDriverWithAEB] 方向盘已回中，恢复方向盘控制");
+                    }
+                }
             }
             else
             {
-                h = Input.GetAxis("Horizontal");
-                v = Input.GetAxis("Vertical");
-                // S / ↓ = 脚刹（高速刹车，低速自动切倒车）
-                footbrake = (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) ? 1f : 0f;
-                if (useGenericGamepad && HasGamepad() && IsJoystickButtonPressed(gamepadBrakeButton))
+                // 手柄模式：使用项目中已经验证能读到 PXN 数值的 Unity 通用轴。
+                // 不再动态访问未登记的“第 2 号轴”，避免 InputException 中断 FixedUpdate。
+                float configuredHorizontal = Input.GetAxisRaw("Horizontal");
+                float configuredVertical = Input.GetAxisRaw("Vertical");
+                if (autoCalibrateGamepadCenter && !gamepadCenterCalibrated)
+                {
+                    // 校准期间不把中心偏差当成倒车输入。
+                    configuredHorizontal = 0f;
+                    configuredVertical = 0f;
+                }
+                else if (autoCalibrateGamepadCenter && gamepadCenterCalibrated)
+                {
+                    configuredHorizontal = NormalizeCenteredAxis(configuredHorizontal, gamepadCenterHorizontal);
+                    configuredVertical = NormalizeCenteredAxis(configuredVertical, gamepadCenterVertical);
+                }
+                h = ApplyDeadzone(configuredHorizontal);
+                v = ApplyDeadzone(configuredVertical);
+                if (useGenericGamepad && HasGamepad() &&
+                    IsJoystickButtonPressed(gamepadBrakeButton, genericGamepadJoystickNumber))
                     footbrake = 1f;
-                handbrake = Input.GetKey(KeyCode.Space) ? 1f : 0f;
-                if (useGenericGamepad && HasGamepad() && IsJoystickButtonPressed(gamepadHandbrakeButton))
+                if (useGenericGamepad && HasGamepad() &&
+                    IsJoystickButtonPressed(gamepadHandbrakeButton, genericGamepadJoystickNumber))
                     handbrake = 1f;
             }
+
+            // 非线性油门：轻推时压低输出，推满时保持满输出。
+            v = ApplyThrottleResponse(v);
 
             // 平滑油门释放：释放时慢慢归零，避免急停
             // 但油门和刹车互斥：有油门时立刻清刹车，有刹车时立刻清油门
             float rawAccel = v;
             float rawBrake = footbrake;
 
-            if (rawAccel > 0.01f)
+            float signedSpeed = Vector3.Dot(m_Car.CarRigidbody.velocity, transform.forward);
+            bool brakingBeforeDirectionChange =
+                (rawAccel < -0.01f && signedSpeed > reverseEngageSpeed) ||
+                (rawAccel > 0.01f && signedSpeed < -reverseEngageSpeed);
+            if (brakingBeforeDirectionChange)
+            {
+                rawAccel = 0f;
+                rawBrake = Mathf.Max(rawBrake, 1f);
+            }
+
+            if (Mathf.Abs(rawAccel) > 0.01f)
             {
                 // 有油门 → 油门快速响应，刹车立刻清零
                 m_SmoothedAccel = Mathf.Lerp(m_SmoothedAccel, rawAccel, Time.fixedDeltaTime * 12f);
@@ -129,6 +290,20 @@ namespace MoonRover.Driver
             }
             v = m_SmoothedAccel;
             footbrake = m_SmoothedBrake;
+
+            if (steeringWheelNeedsCentering)
+            {
+                v = 0f;
+                footbrake = 1f;
+            }
+
+            // 无输入时锁住底盘，避免月面地形的坡度或物理误差让车辆自行倒退。
+            // 一旦检测到明确的前进/后退输入，立即交回正常驾驶逻辑。
+            if (holdBrakeWhenNeutral &&
+                Mathf.Abs(v) <= 0.01f && footbrake <= 0.01f && handbrake <= 0.01f)
+            {
+                footbrake = 1f;
+            }
 
             currentSteerInput = h;
 
@@ -185,17 +360,29 @@ namespace MoonRover.Driver
         void UpdateG29Status()
         {
             if (g29StatusText == null) return;
-            if (useLogitechSteeringWheel && logitechDriver != null)
+
+            g29StatusText.text = "模式：" + GetDriveModeLabel();
+            if (driveMode == DriveInputMode.SteeringWheel && steeringWheelNeedsCentering)
+                g29StatusText.text += "（回中中）";
+            else if (driveMode == DriveInputMode.SteeringWheel && logitechDriver != null)
+                g29StatusText.text += " · " + logitechDriver.GetActiveWheelLabel() +
+                    (logitechDriver.IsWaitingForCenter ? "（回中中）" : "主控");
+            if (driveMode == DriveInputMode.SteeringWheel && logitechDriver != null)
+                g29StatusText.text += " · " + logitechDriver.GetGearLabel();
+
+            if (driveMode == DriveInputMode.SteeringWheel)
             {
-                bool connected = logitechDriver.IsConnected();
-                g29StatusText.text = connected ? "G29: 已连接" : "G29: 未连接 (键盘)";
-                g29StatusText.color = connected ? Color.green : Color.yellow;
+                g29StatusText.color = Color.cyan;
             }
             else
             {
-                g29StatusText.text = "G29: 未启用 (键盘)";
-                g29StatusText.color = Color.yellow;
+                g29StatusText.color = Color.green;
             }
+        }
+
+        private string GetDriveModeLabel()
+        {
+            return driveMode == DriveInputMode.SteeringWheel ? "方向盘" : "手柄";
         }
 
         /// <summary>
@@ -203,9 +390,66 @@ namespace MoonRover.Driver
         /// </summary>
         private float ApplyDeadzone(float value)
         {
-            if (Mathf.Abs(value) < inputDeadzone) return 0f;
+            return ApplyDeadzone(value, inputDeadzone);
+        }
+
+        private float ApplyDeadzone(float value, float deadzone)
+        {
+            deadzone = Mathf.Clamp01(deadzone);
+            if (Mathf.Abs(value) < deadzone) return 0f;
             // 将 [deadzone, 1] 重新映射到 [0, 1]
-            return Mathf.Sign(value) * (Mathf.Abs(value) - inputDeadzone) / (1f - inputDeadzone);
+            return Mathf.Sign(value) * (Mathf.Abs(value) - deadzone) / (1f - deadzone);
+        }
+
+        private float ApplyThrottleResponse(float value)
+        {
+            float exponent = Mathf.Max(1f, throttleResponseExponent);
+            return Mathf.Sign(value) * Mathf.Pow(Mathf.Abs(value), exponent);
+        }
+
+        private float NormalizeCenteredAxis(float raw, float center)
+        {
+            float delta = raw - center;
+            if (delta >= 0f)
+                return Mathf.Clamp01(delta / Mathf.Max(0.001f, 1f - center));
+            return -Mathf.Clamp01(-delta / Mathf.Max(0.001f, 1f + center));
+        }
+
+        private void ResetGamepadCenterCalibration()
+        {
+            gamepadCenterHorizontal = 0f;
+            gamepadCenterVertical = 0f;
+            gamepadCalibrationTime = 0f;
+            gamepadCalibrationSum = Vector2.zero;
+            gamepadCalibrationSamples = 0;
+            gamepadCenterCalibrated = !autoCalibrateGamepadCenter;
+        }
+
+        private void UpdateGamepadCenterCalibration(float deltaTime)
+        {
+            if (!autoCalibrateGamepadCenter || gamepadCenterCalibrated)
+                return;
+
+            gamepadCalibrationSum += new Vector2(
+                Input.GetAxisRaw("Horizontal"),
+                Input.GetAxisRaw("Vertical"));
+            gamepadCalibrationSamples++;
+            gamepadCalibrationTime += deltaTime;
+
+            if (gamepadCalibrationTime < Mathf.Max(0.1f, gamepadCenterCalibrationSeconds))
+                return;
+
+            if (gamepadCalibrationSamples > 0)
+            {
+                Vector2 center = gamepadCalibrationSum / gamepadCalibrationSamples;
+                // 有些手柄静止时会报告 -1 或 1，不能截断为 ±0.95，
+                // 否则静止值会再次被归一化成满量程倒车/前进。
+                gamepadCenterHorizontal = Mathf.Clamp(center.x, -0.999f, 0.999f);
+                gamepadCenterVertical = Mathf.Clamp(center.y, -0.999f, 0.999f);
+            }
+            gamepadCenterCalibrated = true;
+            Debug.Log(string.Format("[ManualDriverWithAEB] 手柄中心校准完成: H={0:F3}, V={1:F3}",
+                gamepadCenterHorizontal, gamepadCenterVertical));
         }
 
         private bool HasGamepad()
@@ -225,6 +469,20 @@ namespace MoonRover.Driver
         {
             if (buttonIndex < 0 || buttonIndex > 19) return false;
             return Input.GetKey((KeyCode)((int)KeyCode.JoystickButton0 + buttonIndex));
+        }
+
+        private bool IsJoystickButtonPressed(int buttonIndex, int joystickNumber)
+        {
+            if (buttonIndex < 0 || buttonIndex > 19) return false;
+
+            // Unity 的 Joystick1Button0...Joystick8Button19 按每个摇杆 20 个按钮连续排列。
+            if (joystickNumber < 1 || joystickNumber > 8)
+                return IsJoystickButtonPressed(buttonIndex);
+
+            int keyCodeValue = (int)KeyCode.Joystick1Button0
+                + (joystickNumber - 1) * 20
+                + buttonIndex;
+            return Input.GetKey((KeyCode)keyCodeValue);
         }
 
         void UpdateAEBAlert()

@@ -1,52 +1,41 @@
 # 月球车仿真平台
 
-这是一个基于 Unity 2022.3.62f3c1 的月球车仿真项目，包含车辆驾驶、局部/混合 AI 导航、地形反馈、状态 HUD，以及可选的 Mbox100 六自由度动感平台接口。底座上的实体按钮尚未在本仓库中完成输入适配，详见联调文档。
+基于 Unity 的月球车驾驶与地形仿真项目，可使用键盘、通用手柄和 Logitech G29 双方向盘进行驾驶，并可连接 Mbox100 六自由度动感平台。
 
-## 项目结构
+## 环境
 
-- `Assets (2)/`：Unity 项目根目录，请用 Unity Hub 打开此目录。
-- `MoonBase/middleware/`：Unity 与 Mbox100 之间的 TCP/UDP 中间件源码、配置说明和测试脚本。
-- `docs/TESTING.md`：按钮、通信链路和实体平台的分阶段联调方案。
-- `CONTRIBUTING.md`：分支、提交和硬件协作约定。
+- Windows 10/11 64 位
+- Unity `2022.3.62f3c1`
+- 连接 G29 时安装 Logitech G HUB
+- 连接 Mbox100 时按 [`MoonBase/middleware/README.md`](MoonBase/middleware/README.md) 配置中间件和控制器网络
 
-## 快速开始
+## 启动 Unity 仿真
 
-1. 安装 Unity `2022.3.62f3c1`。
-2. 用 Unity Hub 打开 `Assets (2)`，等待首次导入和编译完成。
-3. 打开 `Assets/Scenes/SampleScene.unity` 并点击 Play。
-4. 用键盘 `1/2/3` 或界面按钮切换手动、局部 AI、混合 AI 模式。
-5. 无实体底座时，将 `MotionPlatformController.enablePlatform` 关闭；有实体底座时，先按 `docs/TESTING.md` 的顺序启动和验证中间件。
+1. 用 Unity Hub 打开仓库中的 `Assets (2)` 文件夹。
+2. 打开 `Assets/Scenes/SampleScene.unity`。
+3. 点击 Play 开始仿真。
 
-## 手柄控制 Unity 月球车
+也可运行仓库根目录的 `启动Unity仿真.bat`。Unity 首次导入资源时等待导入完成即可。
 
-项目已支持 Windows 识别的通用 USB/Bluetooth 手柄。连接手柄后打开 `SampleScene`，点击 Play 并切换到手动模式：
+## 驾驶与实体按键
 
-- 左摇杆 X 轴：转向；左摇杆 Y 轴：前进/后退。
-- 按钮 0：脚刹；按钮 1：手刹。
-- 场景中会显示手柄名称、两个轴的实时数值和当前按下的按钮编号，便于确认手柄是否被 Unity 识别。
-- 如果要只测试电脑里的虚拟月球车，请先关闭 `MotionPlatformController.enablePlatform`；否则 Unity 仍可能把车辆姿态发送给实体 Mbox 平台。
+- 场景中的 `1`、`2`、`3` 键和驾驶模式按钮切换手动、局部导航和混合导航模式。
+- 手动模式默认使用方向盘。底座控制器显示编号 `1` 的按钮在方向盘与手柄之间切换；当前模式显示在 HUD。
+- 手柄左摇杆控制转向和前进/倒车，按钮 `3` 为脚刹，按钮 `4` 为手刹。
+- 两个方向盘上的 Bottom 3 按钮选择对应方向盘为主控。主控方向盘的左拨片选择倒车档，右拨片选择前进档；副方向盘跟随主控。
+- 底座控制器显示编号 `11` 的按钮切换车辆灯光。
 
-若手柄的按钮编号不同，可在 `car` 对象的 `ManualDriverWithAEB` 组件中修改 `gamepadBrakeButton` 和 `gamepadHandbrakeButton`。
+## Mbox100 动感平台
 
-## 通信链路
+Unity 通过 TCP `127.0.0.1:9999` 连接本机中间件，中间件通过 UDP `192.168.15.201:7408` 连接 Mbox100。电脑连接控制器的网卡使用 `192.168.15.100/24`。
 
-```text
-Unity MotionPlatformController
-  -> TCP 127.0.0.1:9999
-  -> MPSdkMiddleware
-  -> UDP 192.168.15.201:7408
-  -> Mbox100
-```
+运行顺序：确认急停可用并清空平台活动范围，启动 `启动底座中间件.bat`，再运行 Unity 场景。部署和故障处理见 [`MoonBase/middleware/DEPLOY_GUIDE.md`](MoonBase/middleware/DEPLOY_GUIDE.md)。
 
-端口自检默认不会发送运动指令：
+## 目录
 
-```powershell
-cd '<项目根目录>\MoonBase\middleware'
-.\Test-MiddlewareConnection.ps1
-```
+- `Assets (2)/`：Unity 项目、场景、车辆资源与输入/HUD 脚本。
+- `MoonBase/middleware/`：Mbox100 中间件源码、配置和运行说明。
+- `MoonBase/button-detector/`：底座 USB 按键检测工具源码。
+- `docs/`：实体按钮和硬件联调说明。
 
-实体运动测试需要明确追加 `-ExecuteMotion`，并在现场安全条件满足后输入 `MOVE`。厂商 DLL、SafeNet/Sentinel 驱动、USB 加密狗及其授权要求见 `MoonBase/middleware/MIDDLEWARE_BINARIES.md`。
-
-## 协作提示
-
-仓库忽略 Unity `Library`、临时文件、运行日志和未确认可再分发的厂商二进制；第一次克隆后由 Unity 自动重建缓存。不要把许可证、加密狗驱动或密钥提交到公共仓库。
+Unity 项目中的 `.meta` 文件与资源一并保留，克隆后由 Unity 生成本机缓存。

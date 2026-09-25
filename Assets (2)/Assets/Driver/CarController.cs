@@ -40,6 +40,9 @@ namespace UnityStandardAssets.Vehicles.Car
         [SerializeField] private float m_StartupSuspensionExtension = 0.5f;
         [SerializeField] private float m_StartupGroundClearance = 0.02f;
 
+        [Header("前灯")]
+        [SerializeField] private bool m_HeadlightsStartOn = true;
+
         // 私有变量区
         private Quaternion[] m_WheelMeshLocalRotations;
         private Vector3 m_Prevpos, m_Pos;
@@ -66,10 +69,12 @@ namespace UnityStandardAssets.Vehicles.Car
         public float MaxSpeed { get { return m_Topspeed; } }
         public float Revs { get; private set; }
         public float AccelInput { get; private set; }
+        public bool HeadlightsOn { get; private set; }
 
         private void Awake()
         {
             m_Rigidbody = GetComponent<Rigidbody>();
+            ConfigureHeadlights();
             PlaceRoverOnGround();
 
             m_WheelMeshLocalRotations = new Quaternion[4];
@@ -104,6 +109,65 @@ namespace UnityStandardAssets.Vehicles.Car
             }
 
             m_CurrentTorque = m_FullTorqueOverAllWheels - (m_TractionControl * m_FullTorqueOverAllWheels);
+        }
+
+        private void ConfigureHeadlights()
+        {
+            // The rover scene already contains two correctly positioned spot-light
+            // transforms, but both shipped disabled.  Configure them at runtime so
+            // scene/UI layout edits do not need to be regenerated or overwritten.
+            ConfigureHeadlight(transform.Find("Lights/HeadlightLeftSpot"));
+            ConfigureHeadlight(transform.Find("Lights/HeadlighRightSpot"));
+            SetHeadlights(m_HeadlightsStartOn);
+        }
+
+        private static void ConfigureHeadlight(Transform lampTransform)
+        {
+            if (lampTransform == null)
+            {
+                Debug.LogWarning("[Rover headlights] A headlight anchor could not be found.");
+                return;
+            }
+
+            lampTransform.gameObject.SetActive(true);
+
+            Light lamp = lampTransform.GetComponent<Light>();
+            if (lamp == null)
+                lamp = lampTransform.gameObject.AddComponent<Light>();
+
+            lamp.enabled = true;
+            lamp.type = LightType.Spot;
+            lamp.color = new Color(1f, 0.94f, 0.82f, 1f);
+            lamp.intensity = 5.5f;
+            lamp.range = 45f;
+            lamp.spotAngle = 52f;
+            lamp.innerSpotAngle = 32f;
+            lamp.shadows = LightShadows.Soft;
+            lamp.shadowStrength = 0.65f;
+            lamp.shadowBias = 0.03f;
+            lamp.renderMode = LightRenderMode.ForcePixel;
+        }
+
+        public void SetHeadlights(bool enabled)
+        {
+            SetHeadlightActive("Lights/HeadlightLeftSpot", enabled);
+            SetHeadlightActive("Lights/HeadlighRightSpot", enabled);
+            // 同步切换车头发光模型，否则灯关闭后外观仍会保持“亮着”。
+            SetHeadlightActive("SkyCarHeadLightsGlow", enabled);
+            HeadlightsOn = enabled;
+        }
+
+        public void ToggleHeadlights()
+        {
+            SetHeadlights(!HeadlightsOn);
+            Debug.Log("[Rover headlights] 前灯已" + (HeadlightsOn ? "开启" : "关闭"));
+        }
+
+        private void SetHeadlightActive(string path, bool enabled)
+        {
+            Transform lamp = transform.Find(path);
+            if (lamp != null)
+                lamp.gameObject.SetActive(enabled);
         }
 
         private void PlaceRoverOnGround()
@@ -182,8 +246,8 @@ namespace UnityStandardAssets.Vehicles.Car
             
 
             steering = Mathf.Clamp(steering, -1, 1);
-            AccelInput = accel = Mathf.Clamp(accel, 0, 1);
-            BrakeInput = footbrake = Mathf.Clamp(footbrake, -1, 1);
+            AccelInput = accel = Mathf.Clamp(accel, -1, 1);
+            BrakeInput = footbrake = Mathf.Clamp(footbrake, 0, 1);
             handbrake = Mathf.Clamp(handbrake, 0, 1);
 
             m_SteerAngle = steering * m_MaximumSteerAngle;
@@ -255,15 +319,15 @@ namespace UnityStandardAssets.Vehicles.Car
             switch (m_CarDriveType)
             {
                 case CarDriveType.FourWheelDrive:
-                    thrustTorque = accel * (m_CurrentTorque / 4f);
+                    thrustTorque = accel >= 0f ? accel * (m_CurrentTorque / 4f) : accel * (m_ReverseTorque / 4f);
                     for (int i = 0; i < 4; i++) m_WheelColliders[i].motorTorque = thrustTorque;
                     break;
                 case CarDriveType.FrontWheelDrive:
-                    thrustTorque = accel * (m_CurrentTorque / 2f);
+                    thrustTorque = accel >= 0f ? accel * (m_CurrentTorque / 2f) : accel * (m_ReverseTorque / 2f);
                     m_WheelColliders[0].motorTorque = m_WheelColliders[1].motorTorque = thrustTorque;
                     break;
                 case CarDriveType.RearWheelDrive:
-                    thrustTorque = accel * (m_CurrentTorque / 2f);
+                    thrustTorque = accel >= 0f ? accel * (m_CurrentTorque / 2f) : accel * (m_ReverseTorque / 2f);
                     m_WheelColliders[2].motorTorque = m_WheelColliders[3].motorTorque = thrustTorque;
                     break;
             }
@@ -275,8 +339,8 @@ namespace UnityStandardAssets.Vehicles.Car
             {
                 if (m_WheelColliders[i] != null && m_OriginalFwdStiffness != null)
                 {
-                    float targetFwd = (accel > 0f) ? m_OriginalFwdStiffness[i] * gc : m_OriginalFwdStiffness[i];
-                    float targetSide = (accel > 0f) ? m_OriginalSideStiffness[i] * gc : m_OriginalSideStiffness[i];
+                    float targetFwd = (Mathf.Abs(accel) > 0f) ? m_OriginalFwdStiffness[i] * gc : m_OriginalFwdStiffness[i];
+                    float targetSide = (Mathf.Abs(accel) > 0f) ? m_OriginalSideStiffness[i] * gc : m_OriginalSideStiffness[i];
 
                     WheelFrictionCurve fwd = m_WheelColliders[i].forwardFriction;
                     fwd.stiffness = Mathf.Lerp(fwd.stiffness, targetFwd, Time.deltaTime * lerpSpeed);
@@ -296,7 +360,7 @@ namespace UnityStandardAssets.Vehicles.Car
                     m_WheelColliders[i].brakeTorque = m_BrakeTorque * footbrake;
                     m_WheelColliders[i].motorTorque = 0f;
                 }
-                else if (accel > 0f)
+                else if (Mathf.Abs(accel) > 0f)
                 {
                     // 加速
                     m_WheelColliders[i].brakeTorque = 0f;

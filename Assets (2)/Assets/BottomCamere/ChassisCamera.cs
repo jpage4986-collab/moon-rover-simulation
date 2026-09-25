@@ -16,14 +16,53 @@ namespace MoonRover.Vision
         private Camera bottomCam;
         private RenderTexture rt;
 
+        void Awake()
+        {
+            SetupCamera();
+        }
+
         void Start()
         {
             SetupCamera();
         }
 
+        void OnEnable()
+        {
+            if (Application.isPlaying) SetupCamera();
+        }
+
+        void LateUpdate()
+        {
+            // Keep the preview bound even if the HUD is regenerated or a
+            // scene reload clears the RawImage reference after Start().
+            if (!Application.isPlaying) return;
+            if (bottomCam == null || rt == null)
+            {
+                SetupCamera();
+                return;
+            }
+
+            if (bottomCam.targetTexture != rt) bottomCam.targetTexture = rt;
+            if (camImage != null && camImage.texture != rt)
+            {
+                camImage.texture = rt;
+                camImage.color = Color.white;
+            }
+        }
+
         public void SetupCamera()
         {
-            if (bottomCam != null) return;
+            if (bottomCam != null)
+            {
+                bottomCam.enabled = true;
+                if (rt != null) bottomCam.targetTexture = rt;
+                if (camImage != null && rt != null)
+                {
+                    camImage.texture = rt;
+                    camImage.color = Color.white;
+                }
+                return;
+            }
 
             GameObject camObj = new GameObject("HazCam_Bottom");
             camObj.transform.SetParent(this.transform);
@@ -43,6 +82,7 @@ namespace MoonRover.Vision
             if (camImage != null)
             {
                 camImage.texture = rt;
+                camImage.color = Color.white;
                 Debug.Log("[ChassisCamera] 摄像头已绑定到 RawImage");
             }
             else

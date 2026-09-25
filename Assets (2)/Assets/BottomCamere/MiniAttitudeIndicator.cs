@@ -28,11 +28,13 @@ namespace MoonRover.Vision
         private float timer = 0f;
 
         // 颜色
-        private Color skyColor = new Color(0.15f, 0.15f, 0.15f, 1f);      // 深灰 "天空"
-        private Color groundColor = new Color(0.08f, 0.08f, 0.08f, 1f);    // 更深的 "地面"  
-        private Color lineColor = new Color(1f, 1f, 1f, 0.6f);
+        // Keep the center HUD transparent: only the flight-style linework is
+        // drawn, so the driving view remains visible behind the indicator.
+        private Color skyColor = new Color(0.15f, 0.15f, 0.15f, 0f);
+        private Color groundColor = new Color(0.08f, 0.08f, 0.08f, 0f);
+        private Color lineColor = new Color(0.62f, 0.94f, 1f, 0.96f);
         private Color warnColor = new Color(1f, 0.3f, 0.1f, 1f);
-        private Color centerColor = new Color(0.3f, 1f, 0.3f, 1f);
+        private Color centerColor = new Color(0.35f, 1f, 0.55f, 1f);
 
         void Start()
         {
@@ -97,7 +99,7 @@ namespace MoonRover.Vision
                     float horizonY = ry + pitch * pxPerDeg;
 
                     // 天空/地面
-                    pixels[y * w + x] = horizonY < 0 ? skyColor : groundColor;
+                    pixels[y * w + x] = Color.clear;
                 }
             }
 
@@ -165,8 +167,13 @@ namespace MoonRover.Vision
 
             while (true)
             {
-                if (x0 >= 0 && x0 < w && y0 >= 0 && y0 < h)
-                    pixels[y0 * w + x0] = color;
+                for (int oy = -1; oy <= 1; oy++)
+                    for (int ox = -1; ox <= 1; ox++)
+                    {
+                        int px = x0 + ox, py = y0 + oy;
+                        if (px >= 0 && px < w && py >= 0 && py < h)
+                            pixels[py * w + px] = color;
+                    }
 
                 if (x0 == x1 && y0 == y1) break;
                 e2 = 2 * err;

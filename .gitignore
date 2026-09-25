@@ -26,6 +26,11 @@ Thumbs.db
 *.userprefs
 *.booproj
 
+# Local project archives and generated operator tools
+/Assets (2).zip
+/Assets (2)/PRODUCT.md
+/MoonBase/button-detector/*.exe
+
 # Runtime output and local test captures
 **/*.log
 MoonBase/middleware/*.tmp

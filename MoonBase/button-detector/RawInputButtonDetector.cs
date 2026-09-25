@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -34,10 +35,12 @@ namespace MoonBaseButtonDetector
         private const uint RIDI_PREPARSEDDATA = 0x20000005;
         private const uint RIDI_DEVICENAME = 0x20000007;
         private const uint RIDEV_INPUTSINK = 0x00000100;
-        private const uint RIM_TYPEKEYBOARD = 1;
         private const uint RIM_TYPEHID = 2;
 
         private readonly Dictionary<IntPtr, string> deviceNames = new Dictionary<IntPtr, string>();
+        private readonly Dictionary<IntPtr, IntPtr> preparsedData = new Dictionary<IntPtr, IntPtr>();
+        private readonly Dictionary<IntPtr, HashSet<ushort>> pressedButtons = new Dictionary<IntPtr, HashSet<ushort>>();
+        private readonly TextBox output;
 
         [StructLayout(LayoutKind.Sequential)]
         private struct RAWINPUTDEVICE
@@ -80,14 +83,63 @@ namespace MoonBaseButtonDetector
         private static extern uint GetRawInputData(
             IntPtr rawInput, uint command, IntPtr data, ref uint size, uint headerSize);
 
+        private enum HidPReportType
+        {
+            Input = 0,
+            Output = 1,
+            Feature = 2
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct HidpCaps
+        {
+            public ushort Usage;
+            public ushort UsagePage;
+            public ushort InputReportByteLength;
+            public ushort OutputReportByteLength;
+            public ushort FeatureReportByteLength;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 17)]
+            public ushort[] Reserved;
+        }
+
+        [DllImport("hid.dll")]
+        private static extern int HidP_GetCaps(IntPtr preparsedData, ref HidpCaps capabilities);
+
+        [DllImport("hid.dll")]
+        private static extern int HidP_GetUsages(
+            HidPReportType reportType,
+            ushort usagePage,
+            ushort linkCollection,
+            [Out] ushort[] usageList,
+            ref uint usageLength,
+            IntPtr preparsedData,
+            byte[] report,
+            uint reportLength);
+
+        private const int HidpStatusSuccess = 0x00110000;
+
         public DetectorForm()
         {
-            ShowInTaskbar = false;
-            FormBorderStyle = FormBorderStyle.FixedToolWindow;
-            WindowState = FormWindowState.Minimized;
-            Opacity = 0;
-            Width = 1;
-            Height = 1;
+            Text = "MoonBase - Base Button Detector";
+            ShowInTaskbar = true;
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.Sizable;
+            Width = 900;
+            Height = 600;
+            BackColor = System.Drawing.Color.FromArgb(18, 24, 32);
+
+            output = new TextBox();
+            output.Dock = DockStyle.Fill;
+            output.Multiline = true;
+            output.ReadOnly = true;
+            output.ScrollBars = ScrollBars.Both;
+            output.WordWrap = false;
+            output.Font = new System.Drawing.Font("Consolas", 11f);
+            output.ForeColor = System.Drawing.Color.FromArgb(190, 245, 255);
+            output.BackColor = System.Drawing.Color.FromArgb(8, 14, 20);
+            output.BorderStyle = BorderStyle.None;
+            Controls.Add(output);
+            Console.SetOut(new TextBoxWriter(output));
         }
 
         protected override void OnLoad(EventArgs e)
@@ -142,8 +194,45 @@ namespace MoonBaseButtonDetector
 
                 string name = GetDeviceName(item.Device);
                 deviceNames[item.Device] = name;
-                Console.WriteLine("HID: " + name);
+                if (PrepareHidDevice(item.Device))
+                {
+                    Console.WriteLine("HID: " + name + "  [button reports parsed]");
+                }
+                else
+                {
+                    Console.WriteLine("HID: " + name + "  [no standard button page]");
+                }
             }
+        }
+
+        private bool PrepareHidDevice(IntPtr device)
+        {
+            uint size = 0;
+            if (GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, IntPtr.Zero, ref size) == unchecked((uint)-1)
+                || size == 0)
+            {
+                return false;
+            }
+
+            IntPtr data = Marshal.AllocHGlobal((int)size);
+            uint capacity = size;
+            if (GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, data, ref capacity) == unchecked((uint)-1))
+            {
+                Marshal.FreeHGlobal(data);
+                return false;
+            }
+
+            HidpCaps caps = new HidpCaps { Reserved = new ushort[17] };
+            if (HidP_GetCaps(data, ref caps) != HidpStatusSuccess
+                || caps.InputReportByteLength == 0)
+            {
+                Marshal.FreeHGlobal(data);
+                return false;
+            }
+
+            preparsedData[device] = data;
+            pressedButtons[device] = new HashSet<ushort>();
+            return true;
         }
 
         private void RegisterInput()
@@ -203,25 +292,78 @@ namespace MoonBaseButtonDetector
                 if (header.Type == RIM_TYPEHID)
                 {
                     int offset = (int)headerSize;
-                    byte[] data = new byte[Math.Max(0, (int)size - offset)];
-                    if (data.Length > 0)
+                    byte[] hidData = new byte[Math.Max(0, (int)size - offset)];
+                    if (hidData.Length > 0)
                     {
-                        Marshal.Copy(IntPtr.Add(buffer, offset), data, 0, data.Length);
+                        Marshal.Copy(IntPtr.Add(buffer, offset), hidData, 0, hidData.Length);
                     }
-                    Console.WriteLine("[HID BUTTON INPUT] " + DateTime.Now.ToString("HH:mm:ss.fff")
-                        + "\n  设备: " + name + "\n  原始数据: " + ToHex(data));
+                    ReportButtonChanges(header.Device, hidData);
                 }
-                else if (header.Type == RIM_TYPEKEYBOARD)
-                {
-                    // 只提示设备，不把普通键盘按键当成底座按钮显示。
-                    Console.WriteLine("[KEYBOARD INPUT] " + DateTime.Now.ToString("HH:mm:ss.fff")
-                        + "  设备: " + name);
-                }
+                // 键盘类 Raw Input 直接忽略，不显示、不参与按钮检测。
             }
             finally
             {
                 Marshal.FreeHGlobal(buffer);
             }
+        }
+
+        private void ReportButtonChanges(IntPtr device, byte[] hidData)
+        {
+            IntPtr ppd;
+            if (!preparsedData.TryGetValue(device, out ppd) || hidData.Length < 8)
+            {
+                return;
+            }
+
+            int reportSize = BitConverter.ToInt32(hidData, 0);
+            if (reportSize <= 0 || hidData.Length < 8 + reportSize)
+            {
+                return;
+            }
+
+            byte[] report = new byte[reportSize];
+            Buffer.BlockCopy(hidData, 8, report, 0, reportSize);
+            ushort[] usages = new ushort[128];
+            uint usageLength = (uint)usages.Length;
+            int status = HidP_GetUsages(
+                HidPReportType.Input, 0x09, 0, usages, ref usageLength,
+                ppd, report, (uint)report.Length);
+            if (status != HidpStatusSuccess)
+            {
+                return;
+            }
+
+            var current = new HashSet<ushort>();
+            for (int i = 0; i < usageLength && i < usages.Length; i++)
+            {
+                current.Add(usages[i]);
+            }
+
+            HashSet<ushort> previous;
+            if (!pressedButtons.TryGetValue(device, out previous))
+            {
+                previous = new HashSet<ushort>();
+                pressedButtons[device] = previous;
+            }
+
+            foreach (ushort usage in current)
+            {
+                if (!previous.Contains(usage))
+                {
+                    Console.WriteLine("[BUTTON DOWN] " + DateTime.Now.ToString("HH:mm:ss.fff")
+                        + "  设备: " + deviceNames[device] + "  button " + usage);
+                }
+            }
+            foreach (ushort usage in previous)
+            {
+                if (!current.Contains(usage))
+                {
+                    Console.WriteLine("[BUTTON UP]   " + DateTime.Now.ToString("HH:mm:ss.fff")
+                        + "  设备: " + deviceNames[device] + "  button " + usage);
+                }
+            }
+
+            pressedButtons[device] = current;
         }
 
         private static string GetDeviceName(IntPtr device)
@@ -256,6 +398,34 @@ namespace MoonBaseButtonDetector
                 return "<空>";
             }
             return BitConverter.ToString(bytes);
+        }
+
+        private sealed class TextBoxWriter : TextWriter
+        {
+            private readonly TextBox box;
+
+            public TextBoxWriter(TextBox box)
+            {
+                this.box = box;
+            }
+
+            public override Encoding Encoding { get { return Encoding.UTF8; } }
+
+            public override void Write(char value)
+            {
+                Write(value.ToString());
+            }
+
+            public override void Write(string value)
+            {
+                if (box.IsDisposed) return;
+                if (box.InvokeRequired)
+                {
+                    box.BeginInvoke(new Action<string>(Write), value);
+                    return;
+                }
+                box.AppendText(value);
+            }
         }
     }
 }
